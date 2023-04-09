@@ -1,0 +1,21 @@
+{
+"instructions_readme": "1) Open Chrome, 2) go to chrome://tracing, 3) click Load, 4) navigate to this file.",
+
+"traceEvents":[
+{ "pid": "Unity", "ph":"M", "name": "process_name", "args": {"name": "Unity"} },
+{ "pid": "Unity", "ph":"M", "name": "process_sort_index", "args": {"sort_index": -100} },
+{ "pid": "Unity", "tid": 1, "ph":"M", "name": "thread_name", "args": {"name": ""} },
+{ "pid": "Unity", "tid": 1,"ts": 650843693600.1,"dur": 974431.9, "ph":"X", "name": "Build player"},
+{ "pid": "Unity", "tid": 1,"ts": 650843720900.3,"dur": 151607.3, "ph":"X", "name": "Preprocess Player"},
+{ "pid": "Unity", "tid": 1,"ts": 650843883501.1,"dur": 740954.4, "ph":"X", "name": "ProducePlayerScriptAssemblies"},
+{ "pid": "Unity", "tid": 1,"ts": 650844609261.1,"dur": 15012.2, "ph":"X", "name": "Prebuild Cleanup and Recompile"},
+{}
+
+],
+"meta_datetime": "04/03/2023 21:58:40",
+"meta_command_line": "\"D:\\Unity Editors\\2021.3.9f1\\Editor\\Unity.exe\" -projectpath \"G:\\Documents\\Decodex\\decodex-app\\decodex-app\\Decodex App\" -useHub -hubIPC -cloudEnvironment production -licensingIpc LicenseClient-matte -hubSessionId aafc9710-d23a-11ed-afcc-e975b07920d8 -accessToken 39qo3pZ9Xgmtb-FI2_IWA98Ze3b1i6uwO-vNsEipWm4006f",
+"meta_command_line_args": "D:\\Unity Editors\\2021.3.9f1\\Editor\\Unity.exe -projectpath G:\\Documents\\Decodex\\decodex-app\\decodex-app\\Decodex App -useHub -hubIPC -cloudEnvironment production -licensingIpc LicenseClient-matte -hubSessionId aafc9710-d23a-11ed-afcc-e975b07920d8 -accessToken 39qo3pZ9Xgmtb-FI2_IWA98Ze3b1i6uwO-vNsEipWm4006f",
+"meta_user_name": "matte",
+"meta_os_version": "Microsoft Windows NT 10.0.19045.0",
+"meta_cpu_count": "12"
+}

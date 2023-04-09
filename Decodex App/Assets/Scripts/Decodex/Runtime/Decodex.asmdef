@@ -1,0 +1,16 @@
+{
+    "name": "com.decodex",
+    "rootNamespace": "Decodex",
+    "references": [
+        "GUID:51cb2081f39f3e649964622730127799"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
