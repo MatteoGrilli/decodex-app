@@ -778,14 +778,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -3}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0, y: 2, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!1 &1151285503
 GameObject:
   m_ObjectHideFlags: 0
@@ -1185,6 +1185,7 @@ GameObject:
   - component: {fileID: 1796705315}
   - component: {fileID: 1796705314}
   - component: {fileID: 1796705316}
+  - component: {fileID: 1796705317}
   m_Layer: 0
   m_Name: Hand Test
   m_TagString: Untagged
@@ -1206,11 +1207,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _debug: 1
   _curvature: 0.1
-  _fanningDirection: 1
+  _extensionOffset: 0.35
   _closeUpOffset: 0
-  _hoverOffset: 0
   _tiltAngle: 3
   _fanningAngle: 22.5
+  _fanningDirection: 1
 --- !u!4 &1796705315
 Transform:
   m_ObjectHideFlags: 0
@@ -1219,7 +1220,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796705313}
   m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -2, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1239,6 +1240,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _nCards: 10
+--- !u!65 &1796705317
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796705313}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 4.55, y: 1, z: 0.2}
+  m_Center: {x: 0, y: -0.1, z: 0}
 --- !u!1 &1839789252
 GameObject:
   m_ObjectHideFlags: 0

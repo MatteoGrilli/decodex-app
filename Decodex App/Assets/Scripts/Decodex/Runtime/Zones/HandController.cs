@@ -20,16 +20,13 @@ namespace Decodex.Zones
         [Min(0f)]
         private float _curvature;
 
+        [Tooltip("On hover, the hand extends into the view by this distance.")]
         [SerializeField]
-        [Tooltip("Left to right means the left card is on top.")]
-        private FanningDirection _fanningDirection;
+        private float _extensionOffset;
 
         [Tooltip("Offset used to have the bottom side of the card align with the bottom of the screen while the card is in close-up")]
         [SerializeField]
         private float _closeUpOffset;
-
-        [SerializeField]
-        private float _hoverOffset;
 
         [Tooltip("Tilt angle in degrees to prevent overlapping of the sides of cards.")]
         [SerializeField]
@@ -40,9 +37,10 @@ namespace Decodex.Zones
         [Range(0f, 360f)]
         private float _fanningAngle;
 
-        // Some things are missing, like the offset when the hand is hovered over.
+        [SerializeField]
+        [Tooltip("Left to right means the left card is on top.")]
+        private FanningDirection _fanningDirection;
 
-        // Trying Pose for this functionality...
         private Pose _centerOfCurvature;
         private List<(Pose, Pose)> _slotPoses;
 
@@ -81,17 +79,19 @@ namespace Decodex.Zones
                 var cardInstance = zone.GetAll()[i];
                 var pose = _slotPoses[startingIndex + 2 * i];
                 var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
+                cardInstanceGameObject.transform.SetParent(transform);
                 cardInstanceGameObject.transform.position = pose.Item1.position;
                 cardInstanceGameObject.transform.rotation = pose.Item1.rotation;
             }
         }
 
-        private GameObject RenderPoseGizmo(Pose pose) {
+        private GameObject RenderPoseGizmo(Pose pose)
+        {
             var gameObject = new GameObject();
             gameObject.name = "Hand Debug";
             gameObject.transform.position = pose.position;
             gameObject.transform.rotation = pose.rotation;
-            EditorGUIUtility.SetIconForObject(gameObject, (Texture2D) EditorGUIUtility.IconContent("sv_icon_dot4_sml").image);
+            EditorGUIUtility.SetIconForObject(gameObject, (Texture2D)EditorGUIUtility.IconContent("sv_icon_dot4_sml").image);
             return gameObject;
         }
 
@@ -100,7 +100,7 @@ namespace Decodex.Zones
             List<(Pose, Pose)> poses = new();
             int nPoses = 2 * zone.NumSlots - 1;
             float fanningAngleStep = _fanningAngle / (nPoses - 1);
-            for(var i = 0; i < nPoses; i++)
+            for (var i = 0; i < nPoses; i++)
             {
                 Pose restingPose = CalculateRestingPose(fanningAngleStep * i);
                 Pose closeupPose = CalculateRestingPose(fanningAngleStep * i);
@@ -109,7 +109,8 @@ namespace Decodex.Zones
             return poses;
         }
 
-        private Pose CalculateRestingPose(float angle) {
+        private Pose CalculateRestingPose(float angle)
+        {
             var sign = _fanningDirection == FanningDirection.RIGHT_TO_LEFT ? -1 : 1;
             Pose pose = _centerOfCurvature;
             pose.rotation = Quaternion.AngleAxis(0.5f * _fanningAngle, pose.forward) * pose.rotation;
@@ -145,6 +146,28 @@ namespace Decodex.Zones
         protected override void OnItemsShuffled()
         {
             //throw new System.NotImplementedException();
+        }
+
+        /* -------------------- EXTENSION AND RETRACTION --------------------*/
+
+        void OnMouseEnter()
+        {
+            Extend();
+        }
+
+        private void OnMouseExit()
+        {
+            Retract();
+        }
+
+        public void Extend()
+        {
+            transform.position += transform.up * _extensionOffset;
+        }
+
+        public void Retract()
+        {
+            transform.position -= transform.up * _extensionOffset;
         }
     }
 }
