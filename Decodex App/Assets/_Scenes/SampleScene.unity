@@ -1206,7 +1206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _debug: 1
   _curvature: 0.1
-  _fanningDirection: 0
+  _fanningDirection: 1
   _closeUpOffset: 0
   _hoverOffset: 0
   _tiltAngle: 3
@@ -1218,14 +1218,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1796705313}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!114 &1796705316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1238,6 +1238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1144c7b5f84c4241bfd1db531cf2099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _nCards: 10
 --- !u!1 &1839789252
 GameObject:
   m_ObjectHideFlags: 0

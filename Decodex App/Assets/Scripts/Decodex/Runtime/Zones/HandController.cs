@@ -48,14 +48,11 @@ namespace Decodex.Zones
 
         private float _radius;
 
-        private List<GameObject> _slots;
-
         public override void Init(Zone<LinearCoordinate, CardInstance> model)
         {
             base.Init(model);
-            _slots = new();
             _radius = 1 / _curvature;
-            _centerOfCurvature = CalculateCenterOfCurvature(_radius);
+            _centerOfCurvature = CalculateCenterOfCurvature();
             _slotPoses = CalculateSlotPoses();
         }
 
@@ -113,11 +110,11 @@ namespace Decodex.Zones
         }
 
         private Pose CalculateRestingPose(float angle) {
-            var sign = _fanningDirection == FanningDirection.RIGHT_TO_LEFT ? 1 : -1;
+            var sign = _fanningDirection == FanningDirection.RIGHT_TO_LEFT ? -1 : 1;
             Pose pose = _centerOfCurvature;
-            pose.rotation = pose.rotation * Quaternion.AngleAxis(-0.5f * _fanningAngle, pose.forward);
-            pose.rotation = pose.rotation * Quaternion.AngleAxis(angle, pose.forward);
-            pose.rotation = pose.rotation * Quaternion.AngleAxis(_tiltAngle * sign, pose.up);
+            pose.rotation = Quaternion.AngleAxis(0.5f * _fanningAngle, pose.forward) * pose.rotation;
+            pose.rotation = Quaternion.AngleAxis(-angle, pose.forward) * pose.rotation;
+            pose.rotation = Quaternion.AngleAxis(_tiltAngle * sign, pose.up) * pose.rotation;
             pose.position += pose.up * _radius;
             return pose;
         }
@@ -127,11 +124,11 @@ namespace Decodex.Zones
         /// </summary>
         /// <param name="radius"></param>
         /// <returns></returns>
-        private Pose CalculateCenterOfCurvature(float radius)
+        private Pose CalculateCenterOfCurvature()
         {
             var centerOfCurvature = new Pose();
             centerOfCurvature.rotation = transform.rotation;
-            centerOfCurvature.position = transform.position - centerOfCurvature.up * radius;
+            centerOfCurvature.position = transform.position - centerOfCurvature.up * _radius;
             return centerOfCurvature;
         }
 
