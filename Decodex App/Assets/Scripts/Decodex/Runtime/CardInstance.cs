@@ -8,5 +8,10 @@ namespace Decodex.Cards
 
         public string SetId { get; private set; }
 
+        public CardInstance(string id, string setId)
+        {
+            Id = id;
+            SetId = setId;
+        }
     }
 }
