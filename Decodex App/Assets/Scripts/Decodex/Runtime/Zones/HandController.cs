@@ -41,6 +41,9 @@ namespace Decodex.Zones
         [Tooltip("Left to right means the left card is on top.")]
         private FanningDirection _fanningDirection;
 
+        [SerializeField]
+        private GameObject _slotPrefab;
+
         private Pose _centerOfCurvature;
         private List<(Pose, Pose)> _slotPoses;
 
@@ -62,6 +65,7 @@ namespace Decodex.Zones
                 RenderDebug();
             }
 
+            ArrangeSlots();
             ArrangeCardControllers();
         }
 
@@ -71,17 +75,32 @@ namespace Decodex.Zones
             RenderPoseGizmo(_centerOfCurvature);
         }
 
-        private void ArrangeCardControllers()
+        private void ArrangeSlots()
         {
+            // Clear previous slots
+            foreach(Transform child in transform)
+            {
+                GameObject.Destroy(child);
+            }
+            // Create new slots
             var startingIndex = zone.NumSlots - zone.ItemsCount();
             for (int i = 0; i < zone.ItemsCount(); i++)
             {
-                var cardInstance = zone.GetAll()[i];
                 var pose = _slotPoses[startingIndex + 2 * i];
+                var slot = GameObject.Instantiate(_slotPrefab, pose.Item1.position, pose.Item1.rotation);
+                slot.transform.SetParent(transform);
+            }
+        }
+
+        private void ArrangeCardControllers()
+        {
+            for(var i = 0; i < zone.ItemsCount(); i++)
+            {
+                var slot = transform.GetChild(i);
+                var cardInstance = zone.GetAll()[i];
                 var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
-                cardInstanceGameObject.transform.SetParent(transform);
-                cardInstanceGameObject.transform.position = pose.Item1.position;
-                cardInstanceGameObject.transform.rotation = pose.Item1.rotation;
+                cardInstanceGameObject.transform.position = slot.position;
+                cardInstanceGameObject.transform.rotation = slot.rotation;
             }
         }
 
@@ -163,11 +182,13 @@ namespace Decodex.Zones
         public void Extend()
         {
             transform.position += transform.up * _extensionOffset;
+            ArrangeCardControllers();
         }
 
         public void Retract()
         {
             transform.position -= transform.up * _extensionOffset;
+            ArrangeCardControllers();
         }
     }
 }

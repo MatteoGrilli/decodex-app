@@ -1212,6 +1212,7 @@ MonoBehaviour:
   _tiltAngle: 3
   _fanningAngle: 22.5
   _fanningDirection: 1
+  _slotPrefab: {fileID: 8668303980988803120, guid: 766b1bfb498fd014f96fbdbfaf8311d6, type: 3}
 --- !u!4 &1796705315
 Transform:
   m_ObjectHideFlags: 0
