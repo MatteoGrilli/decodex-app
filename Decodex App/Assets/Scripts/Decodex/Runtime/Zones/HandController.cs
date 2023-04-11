@@ -2,15 +2,16 @@ using Decodex.Cards;
 using Grim;
 using Grim.Zones;
 using Grim.Zones.Coordinates;
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using RangeAttribute = UnityEngine.RangeAttribute;
 
 namespace Decodex.Zones
 {
-    public class HandController : ZoneController<LinearCoordinate, CardInstance>
+    public class HandController : ZoneController<LinearCoordinate, CardInstance>, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField]
         private bool _debug;
@@ -88,6 +89,7 @@ namespace Decodex.Zones
             {
                 var pose = _slotPoses[startingIndex + 2 * i];
                 var slot = GameObject.Instantiate(_slotPrefab, pose.Item1.position, pose.Item1.rotation);
+                slot.name = $"{i}";
                 slot.transform.SetParent(transform);
             }
         }
@@ -169,12 +171,12 @@ namespace Decodex.Zones
 
         /* -------------------- EXTENSION AND RETRACTION --------------------*/
 
-        void OnMouseEnter()
+        public void OnPointerEnter(PointerEventData eventData)
         {
             Extend();
         }
 
-        private void OnMouseExit()
+        public void OnPointerExit(PointerEventData eventData)
         {
             Retract();
         }
@@ -190,5 +192,17 @@ namespace Decodex.Zones
             transform.position -= transform.up * _extensionOffset;
             ArrangeCardControllers();
         }
+
+        /* -------------------- CLOSE UP --------------------*/
+
+        private void OnMouseOver()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Physics.Raycast(ray, out var hit);
+            var name = hit.collider.name;
+            Debug.Log(name);
+        }
+
+
     }
 }

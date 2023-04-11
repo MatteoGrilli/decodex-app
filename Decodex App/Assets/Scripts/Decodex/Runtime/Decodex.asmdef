@@ -2,7 +2,8 @@
     "name": "com.decodex",
     "rootNamespace": "Decodex",
     "references": [
-        "GUID:51cb2081f39f3e649964622730127799"
+        "GUID:51cb2081f39f3e649964622730127799",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
