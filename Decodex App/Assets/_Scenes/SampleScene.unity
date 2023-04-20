@@ -1394,9 +1394,12 @@ MonoBehaviour:
   _fanningDirection: 1
   _enableRetract: 1
   _extensionOffset: 0.35
-  _closeUpOffset: 0
-  _showAnchors: 1
+  _enableInspection: 1
+  _inspectionUpOffset: 0.415
+  _inspectionDistanceFromCamera: 1.7
   _showCenterOfCurvature: 1
+  _showAnchors: 1
+  _showInspectedSlot: 0
   _debugRoot: {fileID: 1690871458}
   _slotPrefab: {fileID: 8668303980988803120, guid: 766b1bfb498fd014f96fbdbfaf8311d6, type: 3}
 --- !u!4 &1796705315
