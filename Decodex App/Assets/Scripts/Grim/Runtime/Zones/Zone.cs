@@ -20,14 +20,16 @@ namespace Grim.Zones
             Id = id;
             _items = new();
             layout.ForEach(coord => _items[coord] = default(Item));
+            EventsEnabled = true;
         }
-
 
         /* ---------- EVENT HANDLING ---------- */
 
         public event Action<ZoneEventArgs<Coordinate, Item>> ItemsPut;
         public event Action<ZoneEventArgs<Coordinate, Item>> ItemsRemoved;
         public event Action ItemsShuffled;
+
+        protected bool EventsEnabled { get; set; }
 
         protected void OnItemsPut(ZoneEventArgs<Coordinate, Item> e) => ItemsPut?.Invoke(e);
         protected void OnItemsRemoved(ZoneEventArgs<Coordinate, Item> e) => ItemsRemoved?.Invoke(e);
@@ -71,7 +73,8 @@ namespace Grim.Zones
                 _items[coord] = item;
 
                 // Trigger items put event
-                OnItemsPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
+                if (EventsEnabled)
+                    OnItemsPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
 
                 return true;
             }
@@ -117,7 +120,8 @@ namespace Grim.Zones
                 _items[coord] = default(Item);
 
                 // Trigger items removed event
-                OnItemsRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
+                if (EventsEnabled)
+                    OnItemsRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
 
                 return true;
             }
@@ -174,7 +178,8 @@ namespace Grim.Zones
             }
 
             // Trigger items put event
-            OnItemsShuffled();
+            if (EventsEnabled)
+                OnItemsShuffled();
         }
     }
 }

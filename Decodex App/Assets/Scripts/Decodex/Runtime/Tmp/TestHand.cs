@@ -17,20 +17,23 @@ namespace Decodex
         void Start()
         {
             var layout = LinearCoordinateSpace.GetSegment(new LinearCoordinate(0), LinearCoordinateSpace.Right, 9, true);
-            var model = new Zone<LinearCoordinate, CardInstance>("hand", layout);
+            var model = new CompactZone<LinearCoordinate, CardInstance>("hand", layout);
             var handController = GetComponent<HandController>();
             handController.Init(model);
-            for(int i = 0; i < _nCards; i++)
-            {
-                model.Put(new CardInstance($"{i}", "TST"));
-            }
-            handController.Render();
+            StartCoroutine(PopulateHand(model));
+           
         }
 
-        // Update is called once per frame
-        void Update()
+        private IEnumerator PopulateHand(Zone<LinearCoordinate, CardInstance> model)
         {
-        
+            var addCardInterval = new WaitForSeconds(.3f);
+            for (int i = 0; i < _nCards; i++)
+            {
+                model.Put(new CardInstance($"{i}", "TST"));
+                yield return addCardInterval;
+            }
+            GetComponent<HandController>().Render();
+            yield break;
         }
     }
 }
