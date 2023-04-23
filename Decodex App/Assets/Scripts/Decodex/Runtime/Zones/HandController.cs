@@ -96,7 +96,6 @@ namespace Decodex.Zones
             InitSlots();
             InitInspectedSlot();
             InitPositionController();
-            Render();
         }
 
         private void InitPositionController() => GetComponentInChildren<HandPositionController>().Init(_extensionOffset, _enableRetract);
