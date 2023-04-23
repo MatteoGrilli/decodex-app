@@ -77,6 +77,7 @@ namespace Grim.Zones
             {
                 // Insert new item
                 _items[coord] = item;
+                item.ZoneId = Id;
 
                 // Trigger items put event
                 if (EventsEnabled)
@@ -166,6 +167,7 @@ namespace Grim.Zones
                 // Remove item
                 Item itemToRemove = _items[coord];
                 _items[coord] = default(Item);
+                itemToRemove.ZoneId = null;
 
                 // Trigger items removed event
                 if (EventsEnabled)
