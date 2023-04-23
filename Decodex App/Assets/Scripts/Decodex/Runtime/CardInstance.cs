@@ -14,5 +14,10 @@ namespace Decodex.Cards
             Id = id;
             SetId = setId;
         }
+
+        public bool Equals(IItem other)
+        {
+            return other is CardInstance && Id == other.Id;
+        }
     }
 }

@@ -4,5 +4,6 @@ namespace Grim.Zones.Items
     {
         public string Id { get; }
         public string ZoneId { get; set; }
+        public bool Equals(IItem other);
     }
 }

@@ -42,7 +42,7 @@ namespace Grim.Zones
         protected void OnItemsShuffled() => ItemsShuffled?.Invoke();
 
         /* ---------- UTILITY ----------*/
-        public Coordinate GetCoordinateForItem(Item item) => _items.FirstOrDefault(i => item.Equals(i)).Key;
+        public Coordinate GetCoordinateForItem(Item item) => _items.FirstOrDefault(entry => entry.Value.Equals(item)).Key;
         public int ItemsCount() => _items.Keys.Where(coord => !IsCoordinateEmpty(coord)).Count();
         public bool IsFull() => ItemsCount() == NumSlots;
         private bool IsCoordinateInLayout(Coordinate coord) => _items.ContainsKey(coord);

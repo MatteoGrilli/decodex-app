@@ -11,6 +11,7 @@ using RangeAttribute = UnityEngine.RangeAttribute;
 
 namespace Decodex.Zones
 {
+    // TODO: _slots might not be necessary afterall
     public class HandController : ZoneController<LinearCoordinate, CardInstance>, IPointerMoveHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [BoxGroup("Appearence")]
@@ -219,7 +220,6 @@ namespace Decodex.Zones
 
         protected override void OnItemsPut(ZoneEventArgs<LinearCoordinate, CardInstance> e)
         {
-            Debug.Log("On Items put");
             CreateSlots();
             Render();
         }
