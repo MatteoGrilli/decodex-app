@@ -15,8 +15,10 @@ namespace Grim
         public virtual void Init(Zone<Coordinate, Item> model)
         {
             zone = model;
-            zone.ItemsPut += OnItemsPut;
-            zone.ItemsRemoved += OnItemsRemoved;
+            zone.ItemPut += OnItemsPut;
+            zone.OneOrMoreItemsPut += OnItemsPut;
+            zone.ItemRemoved += OnItemsRemoved;
+            zone.OneOrMoreItemsRemoved += OnItemsRemoved;
             zone.ItemsShuffled += OnItemsShuffled;
             Initialized = true;
         }

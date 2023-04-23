@@ -1,6 +1,7 @@
 using Grim.Zones.Coordinates;
 using Grim.Zones.Items;
 using System;
+using System.Collections.Generic;
 
 namespace Grim.Zones
 {
@@ -8,14 +9,19 @@ namespace Grim.Zones
         where Coordinate: ICoordinate
         where Item: IItem
     {
-        public Coordinate _coordinate;
-        public Item _item;
+        public List<CoordinateItem<Coordinate, Item>> _entries;
         public DateTime Timestamp { get; private set; }
 
         public ZoneEventArgs(Coordinate coord, Item item)
         {
-            _coordinate = coord;
-            _item = item;
+            _entries = new();
+            _entries.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+            Timestamp = DateTime.Now;
+        }
+
+        public ZoneEventArgs(List<CoordinateItem<Coordinate, Item>> list)
+        {
+            _entries = list;
             Timestamp = DateTime.Now;
         }
     }

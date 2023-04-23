@@ -81,7 +81,7 @@ public class ZoneTests
     public void RemoveLinearCoordinateZoneException()
     {
         var zone = CreateLinear();
-        Assert.Throws<ArgumentNullException>(() => zone.Remove(null));
+        Assert.Throws<ArgumentNullException>(() => zone.Remove((LinearCoordinate) null));
         Assert.Throws<ArgumentException>(() => zone.Remove(new LinearCoordinate(-1)));
     }
 
@@ -196,7 +196,7 @@ public class ZoneTests
     public void RemoveCubeCoordinateZoneException()
     {
         var zone = CreateCube();
-        Assert.Throws<ArgumentNullException>(() => zone.Remove(null));
+        Assert.Throws<ArgumentNullException>(() => zone.Remove((CubeCoordinate) null));
         Assert.Throws<ArgumentException>(() => zone.Remove(new CubeCoordinate(3,3,-6)));
     }
 

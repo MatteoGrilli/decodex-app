@@ -18,8 +18,10 @@ namespace Grim.Zones
     {
         public CompactZone(string id, List<Coordinate> layout) : base(id, layout)
         {
-            ItemsPut += e => Compact();
-            ItemsRemoved += e => Compact();
+            ItemPut += e => Compact();
+            OneOrMoreItemsPut += e => Compact();
+            ItemRemoved += e => Compact();
+            OneOrMoreItemsRemoved += e => Compact();
             ItemsShuffled += () => Compact();
         }
 

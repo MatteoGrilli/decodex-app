@@ -1,6 +1,8 @@
+using Codice.Client.BaseCommands;
 using Decodex.Utils;
 using Grim.Zones.Coordinates;
 using Grim.Zones.Items;
+using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +27,18 @@ namespace Grim.Zones
 
         /* ---------- EVENT HANDLING ---------- */
 
-        public event Action<ZoneEventArgs<Coordinate, Item>> ItemsPut;
-        public event Action<ZoneEventArgs<Coordinate, Item>> ItemsRemoved;
+        public event Action<ZoneEventArgs<Coordinate, Item>> ItemPut;
+        public event Action<ZoneEventArgs<Coordinate, Item>> OneOrMoreItemsPut;
+        public event Action<ZoneEventArgs<Coordinate, Item>> ItemRemoved;
+        public event Action<ZoneEventArgs<Coordinate, Item>> OneOrMoreItemsRemoved;
         public event Action ItemsShuffled;
 
         protected bool EventsEnabled { get; set; }
 
-        protected void OnItemsPut(ZoneEventArgs<Coordinate, Item> e) => ItemsPut?.Invoke(e);
-        protected void OnItemsRemoved(ZoneEventArgs<Coordinate, Item> e) => ItemsRemoved?.Invoke(e);
+        protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e) => ItemPut?.Invoke(e);
+        protected void OnOneOrMoreItemsPut(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsPut?.Invoke(e);
+        protected void OnItemRemoved(ZoneEventArgs<Coordinate, Item> e) => ItemRemoved?.Invoke(e);
+        protected void OnOneOrMoreItemsRemoved(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsRemoved?.Invoke(e);
         protected void OnItemsShuffled() => ItemsShuffled?.Invoke();
 
         /* ---------- UTILITY ----------*/
@@ -74,7 +80,7 @@ namespace Grim.Zones
 
                 // Trigger items put event
                 if (EventsEnabled)
-                    OnItemsPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
+                    OnItemPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
 
                 return true;
             }
@@ -93,7 +99,49 @@ namespace Grim.Zones
         /// <returns>Returns true if the item was inserted, false otherwise</returns>
         public bool Put(Item item) => !IsFull() ? this.Put(FirstEmptyCoord(), item) : false;
 
-        
+        /// <summary>
+        /// Puts the items in the specified coordinate for each.
+        /// </summary>
+        /// <param name="entries"></param>
+        public void Put(List<CoordinateItem<Coordinate, Item>> entries)
+        {
+            List<CoordinateItem<Coordinate, Item>> inserted = new();
+            entries.ForEach(entry =>
+            {
+                if (Put(entry.Coordinate, entry.Item))
+                    inserted.Add(entry);
+            });
+
+            if (EventsEnabled)
+            {
+                OnOneOrMoreItemsPut(new ZoneEventArgs<Coordinate, Item>(inserted));
+            }
+        }
+
+        /// <summary>
+        /// Puts the items each in the next open coordinate,
+        /// as defined in the order of the layout during
+        /// initialization.
+        /// </summary>
+        /// <param name="items"></param>
+        public void Put(List<Item> items)
+        {
+            List<CoordinateItem<Coordinate, Item>> inserted = new();
+            items.ForEach(item =>
+            {
+                Coordinate coord = FirstEmptyCoord();
+                if (Put(coord, item))
+                {
+                    inserted.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+                }
+            });
+
+            if (EventsEnabled)
+            {
+                OneOrMoreItemsPut(new ZoneEventArgs<Coordinate, Item>(inserted));
+            }
+        }
+
         /// <summary>
         /// Removes the item from the specified coordinate.
         /// </summary>
@@ -121,7 +169,7 @@ namespace Grim.Zones
 
                 // Trigger items removed event
                 if (EventsEnabled)
-                    OnItemsRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
+                    OnItemRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
 
                 return true;
             }
@@ -134,7 +182,47 @@ namespace Grim.Zones
         /// <summary>
         /// Removes all items from the zone.
         /// </summary>
-        public void RemoveAll() => NonEmptyCoords().ForEach(coord => Remove(coord));
+        public void RemoveAll()
+        {
+            List<CoordinateItem<Coordinate, Item>> removed = new();
+            NonEmptyCoords().ForEach(coord =>
+            {
+                Item item = Get(coord);
+                if (Remove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+            });
+
+            if (EventsEnabled)
+            {
+                OnOneOrMoreItemsRemoved(new ZoneEventArgs<Coordinate, Item>(removed));
+            }
+        }
+
+        /// <summary>
+        /// Removes the item from the specified coordinates.
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public void Remove(List<Coordinate> coords)
+        {
+            // Check arguments
+            if (coords == null)
+            {
+                throw new ArgumentNullException($"[{Id}.Remove] null or empty list of coords");
+            }
+
+            List<CoordinateItem<Coordinate, Item>> removed = new();
+            coords.ForEach(coord =>
+            {
+                Item item = Get(coord);
+                if (Remove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+            });
+
+            if (EventsEnabled)
+            {
+                OnOneOrMoreItemsRemoved(new ZoneEventArgs<Coordinate, Item>(removed));
+            }
+        }
 
         /// <summary>
         /// Gets the item associated with the specified coord.
