@@ -3,7 +3,9 @@ using Decodex.Tiles;
 using Grim;
 using Grim.Zones;
 using Grim.Zones.Coordinates;
+using NaughtyAttributes;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Decodex.Zones
@@ -18,7 +20,7 @@ namespace Decodex.Zones
         [SerializeField]
         private GameObject _tilePrefab;
 
-        private GameObject _tiles;
+        private List<GameObject> _tiles;
 
         public override void Init(Zone<CubeCoordinate, TileInstance> model)
         {
@@ -36,18 +38,25 @@ namespace Decodex.Zones
         {
             zone.GetAll().ForEach(item =>
             {
-                Debug.Log(item.Id + " : " + zone.GetCoordinateForItem(item));
                 var tile = Instantiate(_tilePrefab);
                 tile.transform.SetParent(transform);
-                tile.transform.localPosition = zone.GetCoordinateForItem(item).ToCartesian();
-                _tiles = tile;
+                tile.transform.localPosition = zone.GetCoordinateForItem(item).ToCartesian() * _distance;
+                _tiles.Add(tile);
             });
         }
 
+        private void CleanTiles()
+        {
+            _tiles.ForEach(tile => Destroy(tile));
+            _tiles.Clear();
+        }
+
+        [Button]
         public override void Render()
         {
             base.Render();
-
+            CleanTiles();
+            CreateTiles();
         }
 
         protected override void OnItemsPut(ZoneEventArgs<CubeCoordinate, TileInstance> e)
