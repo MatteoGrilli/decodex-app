@@ -3,7 +3,7 @@ using Grim.Zones.Coordinates;
 using Grim.Zones.Items;
 using UnityEngine;
 
-namespace Grim
+namespace Grim.Zones
 {
     public abstract class ZoneController<Coordinate, Item> : MonoBehaviour
         where Coordinate: ICoordinate

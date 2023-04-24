@@ -166,8 +166,8 @@ namespace Decodex.Zones
             var slot = _slots[index];
             var cardInstance = zone.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
-            cardInstanceGameObject.transform.localPosition = slot.transform.position;
-            cardInstanceGameObject.transform.localRotation = slot.transform.rotation;
+            cardInstanceGameObject.transform.position = slot.transform.position;
+            cardInstanceGameObject.transform.rotation = slot.transform.rotation;
         }
 
         private GameObject RenderPoseGizmo(string name, Pose pose)

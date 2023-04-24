@@ -16,41 +16,52 @@ namespace Decodex
 
         void Start()
         {
-            CreateHand();
-            CreateBoard();
+            CreateHand("Hand 1", 0);
+            CreateHand("Hand 2", 10);
+            CreateBoard("Board");
+            CreateMemory("Memory 1");
+            CreateMemory("Memory 2");
         }
 
-        private void CreateHand()
+        private void CreateHand(string name, int startingCoord)
         {
             var layout = LinearCoordinateSpace.GetSegment(new LinearCoordinate(0), LinearCoordinateSpace.Right, 9, true);
-            var model = new CompactZone<LinearCoordinate, CardInstance>("hand", layout);
-            var handController = GameObject.Find("Hand").GetComponent<HandController>();
+            var model = new CompactZone<LinearCoordinate, CardInstance>(name, layout);
+            var handController = GameObject.Find(name).GetComponent<HandController>();
             handController.Init(model);
-            StartCoroutine(PopulateHand(model));
+            StartCoroutine(PopulateHand(name, startingCoord, model));
         }
 
-        private void CreateBoard()
+        private void CreateBoard(string name)
         {
             var layout = CubeCoordinateSpace.GetBall(new CubeCoordinate(0, 0, 0), 2, true);
-            var model = new Zone<CubeCoordinate, TileInstance>("board", layout);
+            var model = new Zone<CubeCoordinate, TileInstance>(name, layout);
             for(int i = 0; i < layout.Count; i++)
             {
                 model.Put(layout[i], new TileInstance($"{i}"));
             }
-            var boardController = GameObject.Find("Board").GetComponent<BoardController>();
+            var boardController = GameObject.Find(name).GetComponent<BoardController>();
             boardController.Init(model);
             boardController.Render();
         }
 
-        private IEnumerator PopulateHand(Zone<LinearCoordinate, CardInstance> model)
+        private void CreateMemory(string name)
+        {
+            var layout = LinearCoordinateSpace.GetSegment(new LinearCoordinate(0), LinearCoordinateSpace.Right, 6, true);
+            var model = new Zone<LinearCoordinate, CardInstance>(name, layout);
+            var memoryController = GameObject.Find(name).GetComponent<MemoryController>();
+            memoryController.Init(model);
+        }
+
+        private IEnumerator PopulateHand(string name, int startingCoord, Zone<LinearCoordinate, CardInstance> model)
         {
             var addCardInterval = new WaitForSeconds(.3f);
-            for (int i = 0; i < _nCards; i++)
+            for (int i = startingCoord; i < _nCards + startingCoord; i++)
             {
                 model.Put(new CardInstance($"{i}", "TST"));
                 yield return addCardInterval;
             }
-            GameObject.Find("Hand").GetComponent<HandController>().Render();
+            GameObject.Find(name).GetComponent<HandController>().Render();
             yield break;
         }
     }
