@@ -1,5 +1,4 @@
 using Grim.Zones.Coordinates;
-using Grim.Zones.Items;
 using System;
 using System.Collections.Generic;
 

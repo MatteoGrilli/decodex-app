@@ -1,4 +1,4 @@
-using Grim.Zones.Items;
+using Grim.Zones;
 
 namespace Decodex.Cards
 {
@@ -7,7 +7,7 @@ namespace Decodex.Cards
         public string Id { get; private set; }
 
         public string SetId { get; private set; }
-        public string ZoneId { get; set; }
+        public IZone ParentZone { get; set; }
 
         public CardInstance(string id, string setId)
         {

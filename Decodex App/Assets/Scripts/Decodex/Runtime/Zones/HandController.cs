@@ -12,6 +12,7 @@ using RangeAttribute = UnityEngine.RangeAttribute;
 namespace Decodex.Zones
 {
     // TODO: _slots might not be necessary afterall
+    // TODO: the component for the hand extension/retraction is also not necessary
     public class HandController : ZoneController<LinearCoordinate, CardInstance>, IPointerMoveHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [BoxGroup("Appearence")]

@@ -1,5 +1,4 @@
 using Grim.Zones.Coordinates;
-using Grim.Zones.Items;
 using System.Collections.Generic;
 
 namespace Grim.Zones
@@ -16,7 +15,7 @@ namespace Grim.Zones
         where Item : IItem
         where Coordinate : ICoordinate
     {
-        public CompactZone(string id, List<Coordinate> layout) : base(id, layout)
+        public CompactZone(string id, string type, List<Coordinate> layout) : base(id, type, layout)
         {
             ItemPut += e => Compact();
             OneOrMoreItemsPut += e => Compact();

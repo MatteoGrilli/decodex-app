@@ -1,9 +1,9 @@
-namespace Grim.Zones.Items
+namespace Grim.Zones
 {
     public interface IItem
     {
         public string Id { get; }
-        public string ZoneId { get; set; }
+        public IZone ParentZone { get; set; }
         public bool Equals(IItem other);
     }
 }

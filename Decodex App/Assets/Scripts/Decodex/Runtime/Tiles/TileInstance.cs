@@ -1,4 +1,4 @@
-using Grim.Zones.Items;
+using Grim.Zones;
 using System;
 
 namespace Decodex.Tiles
@@ -7,7 +7,7 @@ namespace Decodex.Tiles
     {
         public string Id { get; private set; }
 
-        public string ZoneId { get; set; }
+        public IZone ParentZone { get; set; }
 
         public TileInstance(string id)
         {
@@ -20,7 +20,7 @@ namespace Decodex.Tiles
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, ZoneId);
+            return HashCode.Combine(Id, ParentZone.Id);
         }
 
       

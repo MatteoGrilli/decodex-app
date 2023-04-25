@@ -1,23 +1,27 @@
 using Decodex.Utils;
 using Grim.Zones.Coordinates;
-using Grim.Zones.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Grim.Zones
 {
-    public class Zone<Coordinate, Item> : IItem
+    public class Zone<Coordinate, Item> : IItem, IZone
         where Item : IItem
         where Coordinate : ICoordinate
     {
         public string Id { get; private set; }
+        public string Type { get; private set; }
+
+        public IZone ParentZone { get; set; }
+
         private Dictionary<Coordinate, Item> _items;
         public int NumSlots => _items.Count;
 
-        public Zone(string id, List<Coordinate> layout)
+        public Zone(string id, string type, List<Coordinate> layout)
         {
             Id = id;
+            Type = type;
             _items = new();
             layout.ForEach(coord => _items[coord] = default(Item));
             EventsEnabled = true;
@@ -32,7 +36,6 @@ namespace Grim.Zones
         public event Action ItemsShuffled;
 
         protected bool EventsEnabled { get; set; }
-        public string ZoneId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e) => ItemPut?.Invoke(e);
         protected void OnOneOrMoreItemsPut(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsPut?.Invoke(e);
@@ -76,7 +79,7 @@ namespace Grim.Zones
             {
                 // Insert new item
                 _items[coord] = item;
-                item.ZoneId = Id;
+                item.ParentZone = this;
 
                 // Trigger items put event
                 if (EventsEnabled)
@@ -166,7 +169,7 @@ namespace Grim.Zones
                 // Remove item
                 Item itemToRemove = _items[coord];
                 _items[coord] = default(Item);
-                itemToRemove.ZoneId = null;
+                itemToRemove.ParentZone = null;
 
                 // Trigger items removed event
                 if (EventsEnabled)
@@ -271,8 +274,8 @@ namespace Grim.Zones
                 OnItemsShuffled();
         }
 
-        public bool Equals(IItem other) => Id == other.Id;
-
         public override bool Equals(object other) => other is Zone<Coordinate, Item> && Equals((Zone<Coordinate,Item>)other);
+        public override int GetHashCode() => HashCode.Combine(Id);
+        public bool Equals(IItem other) => GetHashCode() == other.GetHashCode();
     }
 }

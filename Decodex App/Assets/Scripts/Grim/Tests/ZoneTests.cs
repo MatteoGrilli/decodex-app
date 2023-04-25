@@ -2,7 +2,6 @@ using Grim.Zones;
 using Grim.Zones.Coordinates;
 using NUnit.Framework;
 using NSubstitute;
-using Grim.Zones.Items;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -13,13 +12,13 @@ public class ZoneTests
     private Zone<LinearCoordinate, IItem> CreateLinear()
     {
         List<LinearCoordinate> layout = LinearCoordinateSpace.GetSegment(new LinearCoordinate(0), LinearCoordinateSpace.Right, 9, true);
-        return new("hand", layout);
+        return new("hand", "hand", layout);
     }
 
     private Zone<CubeCoordinate, IItem> CreateCube()
     {
         List<CubeCoordinate> layout = CubeCoordinateSpace.GetBall(new CubeCoordinate(0, 0, 0), 2, true);
-        return new("board", layout);
+        return new("board", "hand", layout);
     }
 
     /* -------------------- LINEAR COORDINATE ZONE -------------------- */

@@ -1,5 +1,4 @@
 using Grim.Zones.Coordinates;
-using Grim.Zones.Items;
 
 namespace Grim.Zones
 {
