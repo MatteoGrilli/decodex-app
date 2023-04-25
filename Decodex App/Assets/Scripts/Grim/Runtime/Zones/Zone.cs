@@ -1,15 +1,13 @@
-using Codice.Client.BaseCommands;
 using Decodex.Utils;
 using Grim.Zones.Coordinates;
 using Grim.Zones.Items;
-using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Grim.Zones
 {
-    public class Zone<Coordinate, Item>
+    public class Zone<Coordinate, Item> : IItem
         where Item : IItem
         where Coordinate : ICoordinate
     {
@@ -34,6 +32,7 @@ namespace Grim.Zones
         public event Action ItemsShuffled;
 
         protected bool EventsEnabled { get; set; }
+        public string ZoneId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e) => ItemPut?.Invoke(e);
         protected void OnOneOrMoreItemsPut(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsPut?.Invoke(e);
@@ -271,5 +270,9 @@ namespace Grim.Zones
             if (EventsEnabled)
                 OnItemsShuffled();
         }
+
+        public bool Equals(IItem other) => Id == other.Id;
+
+        public override bool Equals(object other) => other is Zone<Coordinate, Item> && Equals((Zone<Coordinate,Item>)other);
     }
 }
