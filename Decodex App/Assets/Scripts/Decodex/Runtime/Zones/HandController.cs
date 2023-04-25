@@ -253,7 +253,7 @@ namespace Decodex.Zones
         private void UpdateInspectedSlot(PointerEventData eventData)
         {
             Ray ray = Camera.main.ScreenPointToRay(eventData.position);
-            Physics.Raycast(ray, 1000f, LayerMask.GetMask("Hand Slots"));
+            Physics.Raycast(ray, 100f, LayerMask.GetMask("Hand Slots"));
             if (Physics.Raycast(ray, out var hit, 10f, LayerMask.GetMask("Hand Slots")))
             {
                 InspectSlot(hit.collider.GetComponent<HandSlotController>().Index);
