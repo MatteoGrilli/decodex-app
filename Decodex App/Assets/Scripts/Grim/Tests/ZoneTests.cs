@@ -3,9 +3,7 @@ using Grim.Zones.Coordinates;
 using NUnit.Framework;
 using NSubstitute;
 using System.Collections.Generic;
-using UnityEngine;
 using System;
-using static UnityEditor.Progress;
 
 public class ZoneTests
 {
@@ -106,6 +104,10 @@ public class ZoneTests
         var item2 = Substitute.For<IItem>();
         var item3 = Substitute.For<IItem>();
         var item4 = Substitute.For<IItem>();
+        item1.Equals(item1).Returns(true);
+        item2.Equals(item2).Returns(true);
+        item3.Equals(item3).Returns(true);
+        item4.Equals(item4).Returns(true);
         zone.Put(new LinearCoordinate(0), item1);
         zone.Put(new LinearCoordinate(1), item2);
         zone.Put(new LinearCoordinate(2), item3);
@@ -221,6 +223,10 @@ public class ZoneTests
         var item2 = Substitute.For<IItem>();
         var item3 = Substitute.For<IItem>();
         var item4 = Substitute.For<IItem>();
+        item1.Equals(item1).Returns(true);
+        item2.Equals(item2).Returns(true);
+        item3.Equals(item3).Returns(true);
+        item4.Equals(item4).Returns(true);
         zone.Put(new CubeCoordinate(0, 0, 0), item1);
         zone.Put(new CubeCoordinate(1, 1, -2), item2);
         zone.Put(new CubeCoordinate(1, -1, 0), item3);
@@ -254,5 +260,70 @@ public class ZoneTests
         Assert.AreEqual(item3, all[1]);
         Assert.AreEqual(item1, all[2]);
         Assert.AreEqual(item2, all[3]);
+    }
+
+    [Test]
+    public void PutSingleEvents()
+    {
+        var zone = CreateLinear();
+        var item = Substitute.For<IItem>();
+        var onItemPut = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        var onOneOrMoreItemsPut = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        zone.ItemPut += onItemPut;
+        zone.OneOrMoreItemsPut += onOneOrMoreItemsPut;
+        zone.Put(new LinearCoordinate(4), item);
+        onItemPut.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate,IItem>>());
+        onOneOrMoreItemsPut.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate,IItem>>());
+    }
+
+    [Test]
+    public void PutMultipleEvents()
+    {
+        var zone = CreateLinear();
+        var item = Substitute.For<IItem>();
+        var onItemPut = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        var onOneOrMoreItemsPut = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        zone.ItemPut += onItemPut;
+        zone.OneOrMoreItemsPut += onOneOrMoreItemsPut;
+        var itemList = new List<CoordinateItem<LinearCoordinate, IItem>>();
+        itemList.Add(new CoordinateItem<LinearCoordinate, IItem>(new LinearCoordinate(0), item));
+        itemList.Add(new CoordinateItem<LinearCoordinate, IItem>(new LinearCoordinate(4), item));
+        zone.Put(itemList);
+        onItemPut.Received(2).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
+        onOneOrMoreItemsPut.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
+    }
+
+    [Test]
+    public void RemoveSingleEvents()
+    {
+        var zone = CreateLinear();
+        var item = Substitute.For<IItem>();
+        var onItemRemoved = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        var onOneOrMoreItemsRemoved = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        zone.Put(new LinearCoordinate(4), item);
+        zone.ItemRemoved += onItemRemoved;
+        zone.OneOrMoreItemsRemoved += onOneOrMoreItemsRemoved;
+        zone.Remove(new LinearCoordinate(4));
+        onItemRemoved.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
+        onOneOrMoreItemsRemoved.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
+    }
+
+    [Test]
+    public void RemoveMultipleEvents()
+    {
+        var zone = CreateLinear();
+        var item = Substitute.For<IItem>();
+        var onItemRemoved = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        var onOneOrMoreItemsRemoved = Substitute.For<Action<ZoneEventArgs<LinearCoordinate, IItem>>>();
+        zone.Put(new LinearCoordinate(0), item);
+        zone.Put(new LinearCoordinate(1), item);
+        zone.ItemRemoved += onItemRemoved;
+        zone.OneOrMoreItemsRemoved += onOneOrMoreItemsRemoved;
+        var coordList = new List<LinearCoordinate>();
+        coordList.Add(new LinearCoordinate(0));
+        coordList.Add(new LinearCoordinate(1));
+        zone.Remove(coordList);
+        onItemRemoved.Received(2).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
+        onOneOrMoreItemsRemoved.Received(1).Invoke(Arg.Any<ZoneEventArgs<LinearCoordinate, IItem>>());
     }
 }

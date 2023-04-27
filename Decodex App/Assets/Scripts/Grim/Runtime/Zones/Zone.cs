@@ -11,11 +11,13 @@ namespace Grim.Zones
         where Coordinate : ICoordinate
     {
         public string Id { get; private set; }
+
         public string Type { get; private set; }
 
         public IZone ParentZone { get; set; }
 
         private Dictionary<Coordinate, Item> _items;
+
         public int NumSlots => _items.Count;
 
         public Zone(string id, string type, List<Coordinate> layout)
@@ -37,7 +39,11 @@ namespace Grim.Zones
 
         protected bool EventsEnabled { get; set; }
 
-        protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e) => ItemPut?.Invoke(e);
+        protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e)
+        {
+            ItemPut?.Invoke(e);
+            //GameEvents.Current.Trigger<string>("abc", "abc");
+        }
         protected void OnOneOrMoreItemsPut(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsPut?.Invoke(e);
         protected void OnItemRemoved(ZoneEventArgs<Coordinate, Item> e) => ItemRemoved?.Invoke(e);
         protected void OnOneOrMoreItemsRemoved(ZoneEventArgs<Coordinate, Item> e) => OneOrMoreItemsRemoved?.Invoke(e);
@@ -53,6 +59,27 @@ namespace Grim.Zones
         private List<Coordinate> NonEmptyCoords() => _items.Keys.Where(coord => !IsCoordinateEmpty(coord)).ToList();
 
         /* ---------- METHODS ---------- */
+
+        private bool InnerPut(Coordinate coord, Item item)
+        {
+            // Check if coord is occupied
+            if (IsCoordinateEmpty(coord))
+            {
+                // Insert new item
+                _items[coord] = item;
+                item.ParentZone = this;
+
+                // Trigger item put event
+                if (EventsEnabled)
+                    OnItemPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Puts the item in the specified coordinate.
@@ -75,15 +102,11 @@ namespace Grim.Zones
             }
 
             // Check if coord is occupied
-            if (IsCoordinateEmpty(coord))
+            if (InnerPut(coord, item))
             {
-                // Insert new item
-                _items[coord] = item;
-                item.ParentZone = this;
-
                 // Trigger items put event
                 if (EventsEnabled)
-                    OnItemPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
+                    OnOneOrMoreItemsPut(new ZoneEventArgs<Coordinate, Item>(coord, item));
 
                 return true;
             }
@@ -100,7 +123,7 @@ namespace Grim.Zones
         /// </summary>
         /// <param name="item"></param>
         /// <returns>Returns true if the item was inserted, false otherwise</returns>
-        public bool Put(Item item) => !IsFull() ? this.Put(FirstEmptyCoord(), item) : false;
+        public bool Put(Item item) => !IsFull() ? Put(FirstEmptyCoord(), item) : false;
 
         /// <summary>
         /// Puts the items in the specified coordinate for each.
@@ -111,7 +134,7 @@ namespace Grim.Zones
             List<CoordinateItem<Coordinate, Item>> inserted = new();
             entries.ForEach(entry =>
             {
-                if (Put(entry.Coordinate, entry.Item))
+                if (InnerPut(entry.Coordinate, entry.Item))
                     inserted.Add(entry);
             });
 
@@ -133,7 +156,7 @@ namespace Grim.Zones
             items.ForEach(item =>
             {
                 Coordinate coord = FirstEmptyCoord();
-                if (Put(coord, item))
+                if (InnerPut(coord, item))
                 {
                     inserted.Add(new CoordinateItem<Coordinate, Item>(coord, item));
                 }
@@ -142,6 +165,27 @@ namespace Grim.Zones
             if (EventsEnabled)
             {
                 OneOrMoreItemsPut(new ZoneEventArgs<Coordinate, Item>(inserted));
+            }
+        }
+
+        private bool InnerRemove(Coordinate coord)
+        {
+            if (!IsCoordinateEmpty(coord))
+            {
+                // Remove item
+                Item itemToRemove = _items[coord];
+                _items[coord] = default(Item);
+                itemToRemove.ParentZone = null;
+
+                // Trigger item removed event
+                if (EventsEnabled)
+                    OnItemRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -164,16 +208,12 @@ namespace Grim.Zones
                 throw new ArgumentException($"[{Id}.Remove] Invalid coordinate " + coord);
             }
 
-            if (!IsCoordinateEmpty(coord))
+            if (InnerRemove(coord))
             {
-                // Remove item
-                Item itemToRemove = _items[coord];
-                _items[coord] = default(Item);
-                itemToRemove.ParentZone = null;
-
+                Item itemToRemove = Get(coord);
                 // Trigger items removed event
                 if (EventsEnabled)
-                    OnItemRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
+                    OnOneOrMoreItemsRemoved(new ZoneEventArgs<Coordinate, Item>(coord, itemToRemove));
 
                 return true;
             }
@@ -192,7 +232,7 @@ namespace Grim.Zones
             NonEmptyCoords().ForEach(coord =>
             {
                 Item item = Get(coord);
-                if (Remove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+                if (InnerRemove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
             });
 
             if (EventsEnabled)
@@ -219,7 +259,7 @@ namespace Grim.Zones
             coords.ForEach(coord =>
             {
                 Item item = Get(coord);
-                if (Remove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
+                if (InnerRemove(coord)) removed.Add(new CoordinateItem<Coordinate, Item>(coord, item));
             });
 
             if (EventsEnabled)
