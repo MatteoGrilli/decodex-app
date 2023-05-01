@@ -7,9 +7,9 @@ namespace Grim.Rules
     {
         public string Context { get; set; }
         public string Id { get; private set; }
-        private Action<T> _action;
+        private Action<GameEventArgs<T>> _action;
 
-        public GameAction(string context, string id, Action<T> action)
+        public GameAction(string context, string id, Action<GameEventArgs<T>> action)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (id == null) throw new ArgumentNullException(nameof(id));
@@ -20,20 +20,20 @@ namespace Grim.Rules
             _action = action;
         }
 
-        public virtual void Execute(ref T args)
+        public virtual void Execute(ref GameEventArgs<T> payload)
         {
-            GameEventArgs<T> payload = new(ref args);
-
             GameEvents.Current.Trigger(Context, $"Pre_{Id}", payload);
             if (!payload.Continue) return;
-            
-            if (!payload.HasAlreadyExecuted(this))
-            {
-                payload.RegisterAction(Id);
-                _action.Invoke(args);
-            }
+
+            _action.Invoke(payload);
 
             GameEvents.Current.Trigger(Context, $"Post_{Id}", payload);
+        }
+
+        public void Execute(ref T args)
+        {
+            GameEventArgs<T> payload = new(ref args);
+            Execute(ref payload);
         }
     }
 }

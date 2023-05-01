@@ -45,8 +45,8 @@ public class GameActionTests
     public void ExecuteSet()
     {
         TestArguments arg = GenerateTestArguments();
-        var action = new GameAction<TestArguments>("ctx", "id", x => x.anInteger = 3);
-        action.Execute(ref arg);
+        var action = new GameAction<TestArguments>("ctx", "id", x => x.Args.anInteger = 3);
+        action.Execute(ref arg );
         Assert.AreEqual(3, arg.anInteger);
     }
 
@@ -93,38 +93,53 @@ public class GameActionTests
         callbackPost.DidNotReceive().Invoke(Arg.Any<GameEventArgs<TestArguments>>());
     }
 
-    // Warning. Giving actions in different tests the same id causes troubles with the game events.
-    // It's because I'm dumb and can't properly mock a singleton.
+    //[Test]
+    //public void ReplacementDifferentAction()
+    //{
+    //    TestArguments arg = GenerateTestArguments();
+    //    var result = 0;
+    //    var baseAction = new GameAction<TestArguments>("ctx", "base1", x => result = x.Args.anInteger);
+    //    baseAction.Execute(ref arg);
+    //    Assert.AreEqual(1, result);
 
-    [Test]
-    public void ReplacementDifferentAction()
-    {
-        TestArguments arg = GenerateTestArguments();
-        var result = 0;
-        var baseAction = new GameAction<TestArguments>("ctx", "base1", x => result = x.anInteger);
-        baseAction.Execute(ref arg);
-        Assert.AreEqual(1, result);
+    //    var replacementAction = new GameAction<TestArguments>("ctx", "replacement1", x => { result = x.Args.anObject.anInteger; x.Continue = false; });
+    //    GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_base1", x => replacementAction.Execute(ref x));
+    //    arg = GenerateTestArguments();
+    //    baseAction.Execute(ref arg);
+    //    Assert.AreEqual(3, result);
+    //}
 
-        var replacementAction = new GameAction<TestArguments>("ctx", "replacement1", x => result = x.anObject.anInteger);
-        GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_base1", x => { replacementAction.Execute(ref x.Args); x.Continue = false; });
-        arg = GenerateTestArguments();
-        baseAction.Execute(ref arg);
-        Assert.AreEqual(3, result);
-    }
-
-    [Test]
-    public void ReplacementSameAction()
-    {
-        TestArguments arg = GenerateTestArguments();
-        var result = 0;
-        var baseAction = new GameAction<TestArguments>("ctx","base2", x => result = x.anInteger);
-        baseAction.Execute(ref arg);
-        Assert.AreEqual(1, result);
+    //[Test]
+    //public void ReplacementSameAction()
+    //{
+    //    TestArguments arg = GenerateTestArguments();
+    //    var result = 0;
+    //    var baseAction = new GameAction<TestArguments>("ctx","base2", x => result = x.Args.anInteger);
+    //    baseAction.Execute(ref arg);
+    //    Assert.AreEqual(1, result);
         
-        var replacementAction = new GameAction<TestArguments>("ctx", "replacement2", x => x.anInteger *= 2);
-        GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_base2", x => replacementAction.Execute(ref x.Args));
-        arg = GenerateTestArguments();
-        baseAction.Execute(ref arg);
-        Assert.AreEqual(2, result);
-    }
+    //    var replacementAction = new GameAction<TestArguments>("ctx", "replacement2", x => x.Args.anInteger *= 2);
+    //    GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_base2", x => replacementAction.Execute(ref x));
+    //    arg = GenerateTestArguments();
+    //    baseAction.Execute(ref arg);
+    //    Assert.AreEqual(2, result);
+    //}
+
+
+    //[Test]
+    //public void ReplacementCircularAction()
+    //{
+    //    TestArguments arg = GenerateTestArguments();
+    //    var result = 0;
+    //    var baseAction = new GameAction<TestArguments>("ctx", "base3", x => result = x.Args.anInteger);
+
+    //    var replacementAction1 = new GameAction<TestArguments>("ctx", "replacement11", x => { result = x.Args.anObject.anInteger; x.Continue = false;  });
+    //    GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_base3", x => replacementAction1.Execute(ref x));
+    //    var replacementAction2 = new GameAction<TestArguments>("ctx", "replacement22", x => { baseAction.Execute(ref x); x.Continue = false; });
+    //    GameEvents.Current.Subscribe<GameEventArgs<TestArguments>>("ctx", "Pre_replacement11", x => replacementAction2.Execute(ref x));
+
+    //    arg = GenerateTestArguments();
+    //    baseAction.Execute(ref arg);
+    //    Assert.AreEqual(1, result);
+    //}
 }

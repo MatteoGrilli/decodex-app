@@ -6,22 +6,22 @@ namespace Grim.Rules
     {
         private Condition<T> _condition;
         
-        public ConditionedGameAction(string context, string id, Condition<T> condition, Action<T> action) : base(context, id, action)
+        public ConditionedGameAction(string context, string id, Condition<T> condition, Action<GameEventArgs<T>> action) : base(context, id, action)
         {
             if (condition == null) throw new ArgumentNullException(nameof(condition));
             _condition = condition;
         }
 
-        public ConditionedGameAction(string context, string id, Func<T, bool> condition, Action<T> action) : base(context, id, action)
+        public ConditionedGameAction(string context, string id, Func<T, bool> condition, Action<GameEventArgs<T>> action) : base(context, id, action)
         {
             if (condition == null) throw new ArgumentNullException(nameof(condition));
             _condition = new Condition<T>($"{id}_condition", condition);
         }
 
-        public override void Execute(ref T args)
+        public override void Execute(ref GameEventArgs<T> payload)
         {
-            if (_condition.Evaluate(args))
-                base.Execute(ref args);
+            if (_condition.Evaluate(payload.Args))
+                base.Execute(ref payload);
         }
     }
 }
