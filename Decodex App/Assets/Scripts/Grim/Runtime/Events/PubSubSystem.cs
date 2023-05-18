@@ -1,5 +1,3 @@
-using Grim.Events;
-using Grim.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,10 +7,10 @@ namespace Grim.Events
     /// <summary>
     /// Taken (mostly) from Acciaio :*
     /// </summary>
-    public sealed class GameEvents
+    public sealed class PubSubSystem
     {
-        private static GameEvents _instance;
-        public static GameEvents Current
+        private static PubSubSystem _instance;
+        public static PubSubSystem Current
         {
             get
             {

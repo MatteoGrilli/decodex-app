@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Grim
+namespace Grim.Events
 {
-    public class GameEventArgs<T>
+    public class EventArgs<T>
     {
         public T Args;
         
@@ -13,7 +13,7 @@ namespace Grim
 
         public DateTime Timestamp { get; private set; }
 
-        public GameEventArgs(ref T args)
+        public EventArgs(ref T args)
         {
             Timestamp = DateTime.Now;
             Continue = true;

@@ -43,26 +43,26 @@ namespace Grim.Zones
         protected void OnItemPut(ZoneEventArgs<Coordinate, Item> e)
         {
             ItemPut?.Invoke(e);
-            GameEvents.Current.Trigger($"{Id}", "ItemPut", e);
+            PubSubSystem.Current.Trigger($"{Id}", "ItemPut", e);
         }
         protected void OnOneOrMoreItemsPut(ZoneEventArgs<Coordinate, Item> e)
         {
             OneOrMoreItemsPut?.Invoke(e);
-            GameEvents.Current.Trigger($"{Id}", "OneOrMoreItemsPut", e);
+            PubSubSystem.Current.Trigger($"{Id}", "OneOrMoreItemsPut", e);
         }
         protected void OnItemRemoved(ZoneEventArgs<Coordinate, Item> e)
         {
             ItemRemoved?.Invoke(e);
-            GameEvents.Current.Trigger($"{Id}", "ItemRemoved", e);
+            PubSubSystem.Current.Trigger($"{Id}", "ItemRemoved", e);
         }
         protected void OnOneOrMoreItemsRemoved(ZoneEventArgs<Coordinate, Item> e){
             OneOrMoreItemsRemoved?.Invoke(e);
-            GameEvents.Current.Trigger($"{Id}", "OneOrMoreItemsRemoved", e);
+            PubSubSystem.Current.Trigger($"{Id}", "OneOrMoreItemsRemoved", e);
         }
         protected void OnItemsShuffled()
         {
             ItemsShuffled?.Invoke();
-            GameEvents.Current.Trigger($"{Id}", "ItemsShuffled");
+            PubSubSystem.Current.Trigger($"{Id}", "ItemsShuffled");
         }
 
         /* ---------- UTILITY ----------*/
