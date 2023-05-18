@@ -1,4 +1,5 @@
 using Grim.Events;
+using Grim.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,19 +11,16 @@ namespace Grim.Events
     /// </summary>
     public sealed class GameEvents
     {
-        public static GameEvents _instance;
+        private static GameEvents _instance;
         public static GameEvents Current
         {
             get
             {
                 if (_instance == null)
-                {
-                    _instance = new GameEvents();
-                }
+                    _instance = new();
                 return _instance;
             }
         }
-
         public bool IsRunning => true;
         private readonly Dictionary<string, PubSubBoard> _boards = new();
         public PubSubBoard Global = new();
