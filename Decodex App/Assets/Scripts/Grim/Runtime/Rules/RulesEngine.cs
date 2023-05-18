@@ -87,11 +87,11 @@ namespace Grim.Rules
             current.AddChild(rule.Id, new(rule));
         }
 
-        public void Process(EventPayload eventPayload)
+        public void Process(GameEventData gameEvent)
         {
             var executor = new RulesExecutor(_rulesTree, _activeExecutors.Count > 0 ? _activeExecutors.Peek().ExecutionCount : new());
             _activeExecutors.Push(executor);
-            executor.Execute(eventPayload);
+            executor.Process(gameEvent);
             _activeExecutors.Pop();
         }
     }

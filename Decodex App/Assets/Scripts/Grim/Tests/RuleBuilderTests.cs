@@ -20,8 +20,8 @@ namespace Grim.Tests
             Assert.AreEqual("id", rule.Id);
             Assert.AreEqual(new[] { "A", "B", "C" }, rule.Path);
             Assert.IsNull(rule.MaxExecutions);
-            Assert.IsTrue(rule.Condition(new EventPayload()));
-            rule.Action(new EventPayload());
+            Assert.IsTrue(rule.Condition(new GameEventData()));
+            rule.Action(new GameEventData());
             Assert.AreEqual(3, result);
         }
 
@@ -39,8 +39,8 @@ namespace Grim.Tests
             Assert.AreEqual("id", rule.Id);
             Assert.AreEqual(new[] { "A", "B", "C" }, rule.Path);
             Assert.AreEqual(1, rule.MaxExecutions);
-            Assert.IsTrue(rule.Condition(new EventPayload()));
-            rule.Action(new EventPayload());
+            Assert.IsTrue(rule.Condition(new GameEventData()));
+            rule.Action(new GameEventData());
             Assert.AreEqual(3, result);
         }
 

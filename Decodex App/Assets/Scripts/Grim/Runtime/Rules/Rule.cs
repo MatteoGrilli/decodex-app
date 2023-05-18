@@ -9,11 +9,11 @@ namespace Grim.Rules
         public string Id { get; private set; }
         private List<string> _path;
         public List<string> Path { get { return new(_path); } }
-        public Func<EventPayload, bool> Condition;
-        public Func<EventPayload, bool> Action;
+        public Func<GameEventData, bool> Condition;
+        public Func<GameEventData, bool> Action;
         public int? MaxExecutions { get; private set; }
 
-        public Rule(string id, List<string> path, Func<EventPayload, bool> condition, Func<EventPayload, bool> action, int? maxExecutions)
+        public Rule(string id, List<string> path, Func<GameEventData, bool> condition, Func<GameEventData, bool> action, int? maxExecutions)
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
             if (path == null) throw new ArgumentNullException(nameof(path));

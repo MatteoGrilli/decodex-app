@@ -17,12 +17,12 @@ namespace Grim.Rules
             _executionCount = executionCount;
         }
 
-        public void Execute(EventPayload data)
+        public void Process(GameEventData data)
         {
             RecursiveExecute(_root, ref data);
         }
 
-        private bool RecursiveExecute(Node<string, Rule> node, ref EventPayload data)
+        private bool RecursiveExecute(Node<string, Rule> node, ref GameEventData data)
         {
             // Execute children in order
             var continueExecution = true;
@@ -45,7 +45,7 @@ namespace Grim.Rules
             return continueExecution;
         }
 
-        private bool ShouldExecute(Rule rule, EventPayload data) =>
+        private bool ShouldExecute(Rule rule, GameEventData data) =>
             rule != null &&
             !MaxExecutionsReached(rule) &&
             rule.Condition(data);

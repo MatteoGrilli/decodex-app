@@ -85,7 +85,7 @@ namespace Grim.Tests
             instance.Register(activatingRule);
             instance.Register(nonActivatingRule);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "DRAW_CARD";
             eventPayload.Put<int>("AMOUNT", 1);
 
@@ -127,7 +127,7 @@ namespace Grim.Tests
             instance.Register(triggerRule1);
             instance.Register(triggerRule2);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "ACTION_DRAW_N";
             eventPayload.Put<int>("AMOUNT", 2);
 
@@ -164,7 +164,7 @@ namespace Grim.Tests
             instance.Register(selfRule);
             instance.Register(stopRule);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "ACTION_DRAW_N";
             eventPayload.Put<int>("AMOUNT", 2);
 
@@ -198,7 +198,7 @@ namespace Grim.Tests
             instance.Register(selfRule);
             instance.Register(stopRule);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "ACTION_DRAW_N";
             eventPayload.Put<int>("AMOUNT", 2);
 
@@ -241,7 +241,7 @@ namespace Grim.Tests
             instance.Register(ruleToReplace);
             instance.Register(ruleToExecute);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "ACTION_DRAW_N";
             eventPayload.Put<int>("AMOUNT", 2);
 
@@ -286,7 +286,7 @@ namespace Grim.Tests
             instance.Register(replacementRule1);
             instance.Register(originalRule);
 
-            var eventPayload = new EventPayload();
+            var eventPayload = new GameEventData();
             eventPayload.Event = "ACTION_DRAW_N";
             eventPayload.Put<int>("AMOUNT", 3);
 

@@ -8,8 +8,8 @@ namespace Grim.Rules
     {
         private string _id;
         private List<string> _path;
-        private Func<EventPayload, bool> _action;
-        private Func<EventPayload, bool> _condition;
+        private Func<GameEventData, bool> _action;
+        private Func<GameEventData, bool> _condition;
         private int? _maxExecutions;
 
         public RuleBuilder()
@@ -29,13 +29,13 @@ namespace Grim.Rules
             return this;
         }
 
-        public RuleBuilder WithCondition(Func<EventPayload, bool> condition)
+        public RuleBuilder WithCondition(Func<GameEventData, bool> condition)
         {
             _condition = condition;
             return this;
         }
 
-        public RuleBuilder WithAction(Func<EventPayload, bool> action)
+        public RuleBuilder WithAction(Func<GameEventData, bool> action)
         {
             _action = action;
             return this;
