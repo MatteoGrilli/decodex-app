@@ -11,14 +11,14 @@ namespace Grim.Tests
         [Test]
         public void Istantiate()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             Assert.IsNotNull(instance);
         }
 
         [Test]
         public void RegisterRuleWrongStep()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var validRule = Rule.New()
@@ -38,7 +38,7 @@ namespace Grim.Tests
         [Test]
         public void RegisterRulePathTooShort()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var invalidRule = Rule.New()
@@ -52,7 +52,7 @@ namespace Grim.Tests
         [Test]
         public void UnregisterRule()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var rule = Rule.New()
@@ -66,7 +66,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRule()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             instance.RegisterPath(new[] { "ACTUATORS", "SELF" });
             var log = new List<string>();
@@ -85,9 +85,33 @@ namespace Grim.Tests
             instance.Register(activatingRule);
             instance.Register(nonActivatingRule);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "DRAW_CARD";
+            var eventPayload = new GameEventData("DRAW_CARD");
             eventPayload.Put<int>("AMOUNT", 1);
+
+            instance.Process(eventPayload);
+
+            Assert.Contains("Drawn 1 cards", log);
+            Assert.That(log, Has.No.Member("This should NOT trigger"));
+            Assert.AreEqual(1, log.Count);
+        }
+
+        [Test]
+        public void ExecuteRuleEmptyPathBeforeExecution()
+        {
+            var instance = RuleEngine.Instance;
+            instance.Reset();
+            instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYERS" });
+            instance.RegisterPath(new[] { "ACTUATORS", "SELF" });
+            var log = new List<string>();
+            var activatingRule = Rule.New()
+                .WithId("activating")
+                .WithCondition(x => x.Event == "DRAW_CARD")
+                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards"); })
+                .WithPath(new[] { "ACTUATORS", "SELF" })
+                .Build();
+            instance.Register(activatingRule);
+
+            var eventPayload = new GameEventData("DRAW_CARD").Put<int>("AMOUNT", 1);
 
             instance.Process(eventPayload);
 
@@ -99,7 +123,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRuleWithTriggers()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             instance.RegisterPath(new[] { "ACTUATORS", "SELF" });
             instance.RegisterPath(new[] { "ACTUATORS", "TRIGGERS" });
@@ -127,8 +151,7 @@ namespace Grim.Tests
             instance.Register(triggerRule1);
             instance.Register(triggerRule2);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "ACTION_DRAW_N";
+            var eventPayload = new GameEventData("ACTION_DRAW_N");
             eventPayload.Put<int>("AMOUNT", 2);
 
             instance.Process(eventPayload);
@@ -142,7 +165,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRuleWithReplacementStopExecution()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             // Order matters!
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_RULES" });
@@ -164,8 +187,7 @@ namespace Grim.Tests
             instance.Register(selfRule);
             instance.Register(stopRule);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "ACTION_DRAW_N";
+            var eventPayload = new GameEventData("ACTION_DRAW_N");
             eventPayload.Put<int>("AMOUNT", 2);
 
             instance.Process(eventPayload);
@@ -176,7 +198,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRuleWithReplacementModifyPayload()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             // Order matters!
             instance.RegisterPath(new[] { "REPLACEMENT", "OTHER" });
@@ -198,8 +220,7 @@ namespace Grim.Tests
             instance.Register(selfRule);
             instance.Register(stopRule);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "ACTION_DRAW_N";
+            var eventPayload = new GameEventData("ACTION_DRAW_N");
             eventPayload.Put<int>("AMOUNT", 2);
 
             instance.Process(eventPayload);
@@ -211,7 +232,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRuleWithReplacementReplaceAction()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             // Order matters!
             instance.RegisterPath(new[] { "REPLACEMENT", "OTHER" });
@@ -241,8 +262,7 @@ namespace Grim.Tests
             instance.Register(ruleToReplace);
             instance.Register(ruleToExecute);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "ACTION_DRAW_N";
+            var eventPayload = new GameEventData("ACTION_DRAW_N");
             eventPayload.Put<int>("AMOUNT", 2);
 
             instance.Process(eventPayload);
@@ -254,7 +274,7 @@ namespace Grim.Tests
         [Test]
         public void ExecuteRuleWithReplacementCyclical()
         {
-            var instance = RulesEngine.Instance;
+            var instance = RuleEngine.Instance;
             instance.Reset();
             // Order matters!
             instance.RegisterPath(new[] { "REPLACEMENT", "OTHER" });
@@ -286,8 +306,7 @@ namespace Grim.Tests
             instance.Register(replacementRule1);
             instance.Register(originalRule);
 
-            var eventPayload = new GameEventData();
-            eventPayload.Event = "ACTION_DRAW_N";
+            var eventPayload = new GameEventData("ACTION_DRAW_N");
             eventPayload.Put<int>("AMOUNT", 3);
 
             instance.Process(eventPayload);

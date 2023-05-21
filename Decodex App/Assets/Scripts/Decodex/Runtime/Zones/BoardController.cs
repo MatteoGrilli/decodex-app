@@ -33,11 +33,11 @@ namespace Decodex.Zones
 
         private void CreateTiles()
         {
-            zone.GetAll().ForEach(item =>
+            Model.GetAll().ForEach(item =>
             {
                 var tile = Instantiate(_tilePrefab);
                 tile.transform.SetParent(transform);
-                tile.transform.localPosition = zone.GetCoordinateForItem(item).ToCartesian() * _distance;
+                tile.transform.localPosition = Model.GetCoordinateForItem(item).ToCartesian() * _distance;
                 _tiles.Add(tile);
             });
         }

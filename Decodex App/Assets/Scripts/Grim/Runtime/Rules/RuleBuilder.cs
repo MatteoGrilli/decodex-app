@@ -41,6 +41,12 @@ namespace Grim.Rules
             return this;
         }
 
+        public RuleBuilder WithAction(Action<GameEventData> action)
+        {
+            _action = data => { action.Invoke(data); return true; };
+            return this;
+        }
+
         public RuleBuilder WithMaxExecutions(int maxExecutions)
         {
             _maxExecutions = maxExecutions;

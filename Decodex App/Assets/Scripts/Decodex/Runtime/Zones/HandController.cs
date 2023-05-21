@@ -1,5 +1,4 @@
 using Decodex.Cards;
-using Grim;
 using Grim.Zones;
 using Grim.Zones.Coordinates;
 using System.Collections.Generic;
@@ -141,8 +140,8 @@ namespace Decodex.Zones
             _slots.Clear();
 
             // Create new slots
-            var startingIndex = zone.NumSlots - zone.ItemsCount();
-            for (int i = 0; i < zone.ItemsCount(); i++)
+            var startingIndex = Model.NumSlots - Model.ItemsCount();
+            for (int i = 0; i < Model.ItemsCount(); i++)
             {
                 var pose = _anchors[startingIndex + 2 * i];
                 var slot = Instantiate(_slotPrefab, Vector3.zero, Quaternion.identity);
@@ -156,7 +155,7 @@ namespace Decodex.Zones
 
         private void ArrangeCardControllers()
         {
-            for (var i = 0; i < zone.ItemsCount(); i++)
+            for (var i = 0; i < Model.ItemsCount(); i++)
             {
                 if (i != _currentlyInspectedSlotIndex) ArrangeCardController(i);
             }
@@ -165,7 +164,7 @@ namespace Decodex.Zones
         private void ArrangeCardController(int index)
         {
             var slot = _slots[index];
-            var cardInstance = zone.GetAll()[index];
+            var cardInstance = Model.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
             cardInstanceGameObject.transform.position = slot.transform.position;
             cardInstanceGameObject.transform.rotation = slot.transform.rotation;
@@ -185,7 +184,7 @@ namespace Decodex.Zones
         private List<Pose> CalculateAnchors()
         {
             List<Pose> anchors = new();
-            int nPoses = 2 * zone.NumSlots - 1;
+            int nPoses = 2 * Model.NumSlots - 1;
             float fanningAngleStep = _fanningAngle / (nPoses - 1);
             for (var i = 0; i < nPoses; i++)
             {
@@ -278,7 +277,7 @@ namespace Decodex.Zones
             Vector3 inspectionPosition = Camera.main.ScreenToWorldPoint(new Vector3(slotCenterOnScreen.x, 0f, _inspectionDistanceFromCamera));
 
             // Arrange inspected card
-            var cardInstance = zone.GetAll()[index];
+            var cardInstance = Model.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
             cardInstanceGameObject.transform.position = inspectionPosition;
             cardInstanceGameObject.transform.position += cardInstanceGameObject.transform.up * _inspectionUpOffset;

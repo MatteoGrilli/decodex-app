@@ -36,9 +36,9 @@ namespace Decodex.Zones
             _slots.Clear();
 
             // Create new slots
-            var startingIndex = zone.NumSlots - zone.ItemsCount();
-            var totalWidth = _distance * (zone.NumSlots - 1);
-            for (int i = 0; i < zone.NumSlots; i++)
+            var startingIndex = Model.NumSlots - Model.ItemsCount();
+            var totalWidth = _distance * (Model.NumSlots - 1);
+            for (int i = 0; i < Model.NumSlots; i++)
             {
                 var slot = Instantiate(_slotPrefab);
                 slot.transform.SetParent(transform);
@@ -58,7 +58,7 @@ namespace Decodex.Zones
 
         private void ArrangeCardControllers()
         {
-            for (var i = 0; i < zone.ItemsCount(); i++)
+            for (var i = 0; i < Model.ItemsCount(); i++)
             {
                 ArrangeCardController(i);
             }
@@ -67,7 +67,7 @@ namespace Decodex.Zones
         private void ArrangeCardController(int index)
         {
             var slot = _slots[index];
-            var cardInstance = zone.GetAll()[index];
+            var cardInstance = Model.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
             cardInstanceGameObject.transform.localPosition = slot.transform.position;
             cardInstanceGameObject.transform.localRotation = slot.transform.rotation;

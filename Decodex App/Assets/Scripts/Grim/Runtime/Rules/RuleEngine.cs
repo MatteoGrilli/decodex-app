@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace Grim.Rules
 {
-    public class RulesEngine
+    public class RuleEngine
     {
-        private static RulesEngine _instance;
-        public static RulesEngine Instance
+        private static RuleEngine _instance;
+        public static RuleEngine Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new RulesEngine();
+                    _instance = new RuleEngine();
                 }
                 return _instance;
             }
@@ -27,9 +27,9 @@ namespace Grim.Rules
         /// </summary>
         private List<Node<string, Rule>> _ruleInsertionNodes;
 
-        private Stack<RulesExecutor> _activeExecutors;
+        private Stack<RuleExecutor> _activeExecutors;
 
-        private RulesEngine()
+        private RuleEngine()
         {
             Reset();
         }
@@ -89,7 +89,7 @@ namespace Grim.Rules
 
         public void Process(GameEventData gameEvent)
         {
-            var executor = new RulesExecutor(_rulesTree, _activeExecutors.Count > 0 ? _activeExecutors.Peek().ExecutionCount : new());
+            var executor = new RuleExecutor(_rulesTree, _activeExecutors.Count > 0 ? _activeExecutors.Peek().ExecutionCount : new());
             _activeExecutors.Push(executor);
             executor.Process(gameEvent);
             _activeExecutors.Pop();

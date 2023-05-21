@@ -3,21 +3,21 @@ using UnityEngine;
 
 namespace Grim.Zones
 {
-    public abstract class ZoneController<Coordinate, Item> : MonoBehaviour
+    public abstract class ZoneController<Coordinate, Item> : MonoBehaviour, IRenderable
         where Coordinate: ICoordinate
         where Item: IItem
     {
         public bool Initialized { get; private set; }
-        protected Zone<Coordinate, Item> zone;
+        public Zone<Coordinate, Item> Model { get; protected set; }
 
         public virtual void Init(Zone<Coordinate, Item> model)
         {
-            zone = model;
-            zone.ItemPut += OnItemsPut;
-            zone.OneOrMoreItemsPut += OnItemsPut;
-            zone.ItemRemoved += OnItemsRemoved;
-            zone.OneOrMoreItemsRemoved += OnItemsRemoved;
-            zone.ItemsShuffled += OnItemsShuffled;
+            this.Model = model;
+            this.Model.ItemPut += OnItemsPut;
+            this.Model.OneOrMoreItemsPut += OnItemsPut;
+            this.Model.ItemRemoved += OnItemsRemoved;
+            this.Model.OneOrMoreItemsRemoved += OnItemsRemoved;
+            this.Model.ItemsShuffled += OnItemsShuffled;
             Initialized = true;
         }
 

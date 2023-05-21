@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace Grim.Rules
 {
-    public class RulesExecutor
+    public class RuleExecutor
     {
         private Node<string, Rule> _root;
         private Dictionary<string, int> _executionCount;
         public Dictionary<string, int> ExecutionCount { get { return new(_executionCount); } }
 
-        public RulesExecutor(Node<string, Rule> root) : this(root, new()) { }
+        public RuleExecutor(Node<string, Rule> root) : this(root, new()) { }
 
-        public RulesExecutor(Node<string, Rule> root, Dictionary<string, int> executionCount)
+        public RuleExecutor(Node<string, Rule> root, Dictionary<string, int> executionCount)
         {
             _root = root;
             _executionCount = executionCount;
