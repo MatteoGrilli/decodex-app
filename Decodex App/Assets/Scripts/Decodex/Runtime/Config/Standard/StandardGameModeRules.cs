@@ -1,7 +1,10 @@
 using Decodex.Cards;
+using Grim;
 using Grim.Rules;
 using Grim.Zones;
 using Grim.Zones.Coordinates;
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Decodex
@@ -23,6 +26,7 @@ namespace Decodex
 
         public static void RegisterRulesStartOfGame()
         {
+            // Determine starting player
             // Set up daemon
             // Set up memory
             // Draw a starting hand
@@ -34,13 +38,17 @@ namespace Decodex
                 .WithAction(data =>
                 {
                     Debug.Log("DRAWING_STARTING_HAND FOR PLAYER 1");
-                    RuleEngine.Instance.Process(
-                    new GameEventData(GameEventTypes.DrawN)
-                        // TODO: determine this from the player object!
-                        .Put<int>("AMOUNT", 7)
-                        .Put<string>("ZONE_FROM", "deck_1")
-                        .Put<string>("ZONE_TO", "hand_1")
-                    );
+                    data.Get<List<string>>("PLAYERS").ForEach(playerId =>
+                    {
+                        var player = GameObject.Find(playerId).GetComponent<PlayerController>();
+                        RuleEngine.Instance.Process(
+                        new GameEventData(GameEventTypes.DrawN)
+                            // TODO: determine this from the player object!
+                            .Put<int>("AMOUNT", 7)
+                            .Put<string>("ZONE_FROM", player.Model.ZoneIds["deck"])
+                            .Put<string>("ZONE_TO", player.Model.ZoneIds["hand"])
+                        );
+                    });
                 })
                 .Build()
             );

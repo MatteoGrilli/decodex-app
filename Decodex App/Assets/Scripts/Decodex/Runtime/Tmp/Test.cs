@@ -7,8 +7,6 @@ namespace Decodex
         void Start()
         {
             var gameMode = new StandardGameMode();
-            gameMode.CreateZones();
-            gameMode.InitRuleEngine();
             gameMode.StartGame();
         }
     }
