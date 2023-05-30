@@ -23,7 +23,7 @@ namespace Grim.Rules
             return this;
         }
 
-        public RuleBuilder WithPath(string[] path)
+        public RuleBuilder WithPath(params string[] path)
         {
             _path = new(path);
             return this;

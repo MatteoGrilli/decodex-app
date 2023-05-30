@@ -27,6 +27,6 @@ namespace Grim.Rules
         }
 
         public T Get<T>(string key)
-            => (T)entries[FullKey<T>(key)];
+            => entries.ContainsKey(FullKey<T>(key)) ? (T)entries[FullKey<T>(key)] : default(T);
     }
 }

@@ -3,9 +3,12 @@ using Grim;
 using Grim.Rules;
 using Grim.Zones;
 using Grim.Zones.Coordinates;
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
+using Grim.Utils;
+using Decodex.Utils;
+using System.Linq;
+using Grim.Players;
 
 namespace Decodex
 {
@@ -22,11 +25,26 @@ namespace Decodex
             RuleEngine.Instance.RegisterPath(new[] { "REPLACEMENT", "OTHERS" });
             RuleEngine.Instance.RegisterPath(new[] { "ACTUATORS", "SELF" });
             RuleEngine.Instance.RegisterPath(new[] { "ACTUATORS", "TRIGGERS" });
+            RuleEngine.Instance.RegisterPath(new[] { "ACTUATORS", "POST" });
         }
 
         public static void RegisterRulesStartOfGame()
         {
             // Determine starting player
+            RuleEngine.Instance.Register(
+                Rule.New()
+                .WithId("DETERMINE_PLAYER_ORDER")
+                .WithPath(new[] { "ACTUATORS", "SELF" })
+                .WithCondition(data => data.Event == GameEventTypes.StartGame)
+                .WithAction(data =>
+                {
+                    var players = GameObject.FindGameObjectsWithTag("PLAYER");
+                    ArrayUtils.Shuffle(players);
+                    GameState.Instance.PlayerOrder = new List<string>(players.Select(player => player.GetComponent<PlayerController>().Model.Id));
+                    Debug.Log("DETERMINE_PLAYER_ORDER: Player order is: " + string.Join(", ", GameState.Instance.PlayerOrder));
+                })
+                .Build()
+            );
             // Set up daemon
             // Set up memory
             // Draw a starting hand
@@ -37,21 +55,103 @@ namespace Decodex
                 .WithCondition(data => data.Event == GameEventTypes.StartGame)
                 .WithAction(data =>
                 {
-                    Debug.Log("DRAWING_STARTING_HAND FOR PLAYER 1");
-                    data.Get<List<string>>("PLAYERS").ForEach(playerId =>
+                    // TODO: Consider creating a utility for this
+                    var playerModels = new List<Player>(GameObject.FindGameObjectsWithTag("PLAYER").Select(player => player.GetComponent<PlayerController>().Model));
+                    playerModels.ForEach(playerModel =>
                     {
-                        var player = GameObject.Find(playerId).GetComponent<PlayerController>();
+                        Debug.Log("DRAW_STARTING_HAND: Drawing hand for player " + playerModel.Id);
                         RuleEngine.Instance.Process(
                         new GameEventData(GameEventTypes.DrawN)
-                            // TODO: determine this from the player object!
                             .Put<int>("AMOUNT", 7)
-                            .Put<string>("ZONE_FROM", player.Model.ZoneIds["deck"])
-                            .Put<string>("ZONE_TO", player.Model.ZoneIds["hand"])
+                            .Put<string>("ZONE_FROM", playerModel.ZoneIds["deck"])
+                            .Put<string>("ZONE_TO", playerModel.ZoneIds["hand"])
                         );
                     });
                 })
                 .Build()
             );
+            // Start first turn after round start
+            RuleEngine.Instance.Register(
+                Rule.New()
+                .WithId("START_FIRST_ROUND")
+                .WithPath(new[] { "ACTUATORS", "POST" })
+                .WithCondition(data => data.Event == GameEventTypes.StartGame)
+                .WithAction(data =>
+                {
+                    var firstPlayerId = GameState.Instance.PlayerOrder[0];
+                    Debug.Log("START_ROUND: Starting round. First player is: " + firstPlayerId);
+                    RuleEngine.Instance.Process(
+                        new GameEventData(GameEventTypes.StartTurn)
+                            .Put<string>("PLAYER", firstPlayerId)
+                    );
+                })
+                .Build()
+            );
+        }
+
+        public static void RegisterRulesTurnStructure()
+        {
+            // At the start of their turn, the turn player draws a card.
+            RuleEngine.Instance.Register(
+                Rule.New()
+                .WithId("START_TURN_DRAW")
+                .WithPath(new[] { "ACTUATORS", "SELF" })
+                .WithCondition(data => data.Event == GameEventTypes.StartTurn)
+                .WithAction(data =>
+                {
+                    var turnPlayerId = data.Get<string>("PLAYER");
+                    var turnPlayerModel = GameObject.Find(turnPlayerId).GetComponent<PlayerController>().Model;
+                    Debug.Log("START_TURN_DRAW: Drawing a card at start of turn for player " + turnPlayerId);
+                    RuleEngine.Instance.Process(
+                        new GameEventData(GameEventTypes.Draw)
+                            .Put<string>("ZONE_FROM", turnPlayerModel.ZoneIds["deck"])
+                            .Put<string>("ZONE_TO", turnPlayerModel.ZoneIds["hand"])
+                    );
+                })
+                .Build()
+            );
+            // After a player's turn ends, either start the next player's turn or start the simulation
+            RuleEngine.Instance.Register(
+                Rule.New()
+                .WithId("START_FOLLOWING_TURN")
+                .WithPath("ACTUATORS", "POST")
+                .WithCondition(data => {
+                    var turnPlayer = data.Get<string>("PLAYER");
+                    var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
+                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers;
+                    return data.Event == GameEventTypes.EndTurn && isThereFollowingPlayer;
+                })
+                .WithAction(data => {
+                    var turnPlayer = data.Get<string>("PLAYER");
+                    var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
+                    var nextPlayer = GameState.Instance.PlayerOrder[orderInTurn + 1];
+                    Debug.Log("START_FOLLOWING_TURN: Starting turn for player " + nextPlayer);
+                    RuleEngine.Instance.Process(
+                        new GameEventData(GameEventTypes.StartTurn)
+                            .Put<string>("PLAYER", nextPlayer)
+                    );
+                })
+                .Build()
+            );
+            RuleEngine.Instance.Register(
+                Rule.New()
+                .WithId("START_SIMULATION")
+                .WithPath("ACTUATORS", "POST")
+                .WithCondition(data => {
+                    var turnPlayer = data.Get<string>("PLAYER");
+                    var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
+                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers;
+                    return data.Event == GameEventTypes.EndTurn && !isThereFollowingPlayer;
+                })
+                .WithAction(data => {
+                    Debug.Log("START_SIMULATION: Starting simulation");
+                    RuleEngine.Instance.Process(
+                        new GameEventData(GameEventTypes.StartSimulation)
+                    );
+                })
+                .Build()
+            );
+            // TODO: Describe all simulation flow!
         }
 
         public static void RegisterRulesPlayerActions()
@@ -64,7 +164,6 @@ namespace Decodex
                 .WithCondition(data => data.Event == GameEventTypes.DrawN)
                 .WithAction(data =>
                 {
-                    Debug.Log($"DRAWING {data.Get<int>("AMOUNT")} CARDS!");
                     for (int i = 0; i < data.Get<int>("AMOUNT"); i++)
                         RuleEngine.Instance.Process(
                             new GameEventData(GameEventTypes.Draw)

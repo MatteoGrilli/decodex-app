@@ -46,6 +46,7 @@ namespace Decodex
             StandardGameModeRules.RegisterPaths();
             StandardGameModeRules.RegisterRulesStartOfGame();
             StandardGameModeRules.RegisterRulesPlayerActions();
+            StandardGameModeRules.RegisterRulesTurnStructure();
         }
 
         private void CreateZones()
