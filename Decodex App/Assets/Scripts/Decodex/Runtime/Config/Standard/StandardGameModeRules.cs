@@ -118,7 +118,7 @@ namespace Decodex
                 .WithCondition(data => {
                     var turnPlayer = data.Get<string>("PLAYER");
                     var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
-                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers;
+                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers - 1;
                     return data.Event == GameEventTypes.EndTurn && isThereFollowingPlayer;
                 })
                 .WithAction(data => {
@@ -140,7 +140,7 @@ namespace Decodex
                 .WithCondition(data => {
                     var turnPlayer = data.Get<string>("PLAYER");
                     var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
-                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers;
+                    var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers - 1;
                     return data.Event == GameEventTypes.EndTurn && !isThereFollowingPlayer;
                 })
                 .WithAction(data => {
@@ -186,6 +186,8 @@ namespace Decodex
                     var cardToDraw = modelFrom.Get(new LinearCoordinate(0));
                     modelFrom.Remove(new LinearCoordinate(0)); // todo: might be useful to have a remove with item as well
                     modelTo.Put(cardToDraw);
+                    // Possibly delegate to a more generic "MOVE_CARD" rule.
+                    // To further split into "REMOVE_CARD_FROM_ZONE" and "ADD_CARD_TO_ZONE"
                 })
                 .Build()
             );
