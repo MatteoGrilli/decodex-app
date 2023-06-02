@@ -1,6 +1,7 @@
 using Grim.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grim.Rules
 {
@@ -8,7 +9,7 @@ namespace Grim.Rules
     {
         private string _id;
         private List<string> _path;
-        private Func<GameEventData, bool> _action;
+        private Func<GameEventData, Task<bool>> _action;
         private Func<GameEventData, bool> _condition;
         private int? _maxExecutions;
 
@@ -35,15 +36,15 @@ namespace Grim.Rules
             return this;
         }
 
-        public RuleBuilder WithAction(Func<GameEventData, bool> action)
+        public RuleBuilder WithAction(Func<GameEventData, Task<bool>> action)
         {
             _action = action;
             return this;
         }
 
-        public RuleBuilder WithAction(Action<GameEventData> action)
+        public RuleBuilder WithAction(Func<GameEventData, Task> action)
         {
-            _action = data => { action.Invoke(data); return true; };
+            _action = async data => { await action.Invoke(data); return true; };
             return this;
         }
 

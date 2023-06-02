@@ -1,5 +1,6 @@
 using Grim.Utils;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grim.Rules
 {
@@ -87,11 +88,11 @@ namespace Grim.Rules
             current.AddChild(rule.Id, new(rule));
         }
 
-        public void Process(GameEventData gameEvent)
+        public async Task Process(GameEventData gameEvent)
         {
             var executor = new RuleExecutor(_rulesTree, _activeExecutors.Count > 0 ? _activeExecutors.Peek().ExecutionCount : new());
             _activeExecutors.Push(executor);
-            executor.Process(gameEvent);
+            await executor.Process(gameEvent);
             _activeExecutors.Pop();
         }
     }

@@ -1,5 +1,6 @@
 using Grim.Utils;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grim.Rules
 {
@@ -17,19 +18,19 @@ namespace Grim.Rules
             _executionCount = executionCount;
         }
 
-        public void Process(GameEventData data)
+        public Task<bool> Process(GameEventData data)
         {
-            RecursiveExecute(_root, ref data);
+            return RecursiveExecute(_root, data);
         }
 
-        private bool RecursiveExecute(Node<string, Rule> node, ref GameEventData data)
+        private async Task<bool> RecursiveExecute(Node<string, Rule> node, GameEventData data)
         {
             // Execute children in order
             var continueExecution = true;
             var enumerator = node.Children.Values.GetEnumerator();
             while (continueExecution && enumerator.MoveNext())
             {
-                continueExecution = RecursiveExecute(enumerator.Current, ref data);
+                continueExecution = await RecursiveExecute(enumerator.Current, data);
             }
             // Then execute this node
             Rule rule = node.Value;
@@ -40,7 +41,7 @@ namespace Grim.Rules
                     _executionCount[rule.Id] = 0;
                 }
                 _executionCount[rule.Id]++;
-                continueExecution = node.Value.Action(data);
+                continueExecution = await node.Value.Action(data);
             }
             return continueExecution;
         }

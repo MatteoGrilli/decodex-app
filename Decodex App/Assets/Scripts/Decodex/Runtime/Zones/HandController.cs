@@ -7,6 +7,7 @@ using UnityEngine;
 using NaughtyAttributes;
 using UnityEngine.EventSystems;
 using RangeAttribute = UnityEngine.RangeAttribute;
+using DG.Tweening;
 
 namespace Decodex.Zones
 {
@@ -166,8 +167,8 @@ namespace Decodex.Zones
             var slot = _slots[index];
             var cardInstance = Model.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
-            cardInstanceGameObject.transform.position = slot.transform.position;
-            cardInstanceGameObject.transform.rotation = slot.transform.rotation;
+            cardInstanceGameObject.transform.DOMove(slot.transform.position, 0.4f).SetEase(Ease.InOutCubic);
+            cardInstanceGameObject.transform.DORotate(slot.transform.rotation.eulerAngles, 0.4f).SetEase(Ease.InOutCubic);
         }
 
         private GameObject RenderPoseGizmo(string name, Pose pose)

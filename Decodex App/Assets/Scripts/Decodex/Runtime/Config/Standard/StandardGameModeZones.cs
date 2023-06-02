@@ -3,7 +3,6 @@ using Decodex.Zones;
 using Grim.Zones.Coordinates;
 using Grim.Zones;
 using UnityEngine;
-using System.Linq;
 using Decodex.Cards;
 using UnityEditor;
 
@@ -17,6 +16,17 @@ namespace Decodex
     /// </summary>
     public static class StandardGameModeZones
     {
+        public static GameObject CreateInspector(string id, Transform parent, Vector3 localPosition, Quaternion localRotation)
+        {
+            // Create gameobject
+            var zoneObj = new GameObject(id);
+            zoneObj.name = id;
+            zoneObj.transform.SetParent(parent);
+            zoneObj.transform.localPosition = localPosition;
+            zoneObj.transform.localRotation = localRotation;
+            return zoneObj;
+        }
+
         public static GameObject CreateBoard(string id, Transform parent, Vector3 localPosition, Quaternion localRotation)
         {
             // Create model

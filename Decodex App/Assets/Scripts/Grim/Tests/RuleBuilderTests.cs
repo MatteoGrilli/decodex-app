@@ -15,7 +15,7 @@ namespace Grim.Tests
             var rule = Rule.New()
                 .WithId("id")
                 .WithPath(new[] { "A", "B", "C" })
-                .WithAction(x => { result = 3; return true; })
+                .WithAction(async x => { result = 3; })
                 .Build();
             Assert.AreEqual("id", rule.Id);
             Assert.AreEqual(new[] { "A", "B", "C" }, rule.Path);
@@ -33,7 +33,7 @@ namespace Grim.Tests
                 .WithId("id")
                 .WithPath(new[] { "A", "B", "C" })
                 .WithCondition(x => true)
-                .WithAction(x => { result = 3; return true; })
+                .WithAction(async x => { result = 3; })
                 .WithMaxExecutions(1)
                 .Build();
             Assert.AreEqual("id", rule.Id);
@@ -51,7 +51,7 @@ namespace Grim.Tests
                 Rule.New()
                     .WithPath(new[] { "A", "B", "C" })
                     .WithCondition(x => true)
-                    .WithAction(x => true)
+                    .WithAction(async x => { })
                     .Build()
             );
         }

@@ -3,6 +3,7 @@ using Grim.Utils;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grim.Tests
 {
@@ -23,12 +24,12 @@ namespace Grim.Tests
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var validRule = Rule.New()
                 .WithId("valid")
-                .WithAction(x => true)
+                .WithAction(async x => { })
                 .WithPath(new[] { "CONTINUOUS", "ON_PLAYER" })
                 .Build();
             var invalidRule = Rule.New()
                 .WithId("invalid")
-                .WithAction(x => true)
+                .WithAction(async x => { })
                 .WithPath(new[] { "CONTINUOUS", "INVALID" })
                 .Build();
             Assert.DoesNotThrow(() => instance.Register(validRule));
@@ -43,7 +44,7 @@ namespace Grim.Tests
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var invalidRule = Rule.New()
                 .WithId("valid")
-                .WithAction(x => true)
+                .WithAction(async x => { })
                 .WithPath(new[] { "CONTINUOUS" })
                 .Build();
             Assert.Throws<Exception>(() => instance.Register(invalidRule));
@@ -57,7 +58,7 @@ namespace Grim.Tests
             instance.RegisterPath(new[] { "CONTINUOUS", "ON_PLAYER" });
             var rule = Rule.New()
                 .WithId("valid")
-                .WithAction(x => true)
+                .WithAction(async x => { })
                 .WithPath(new[] { "CONTINUOUS", "ON_PLAYER" })
                 .Build();
             instance.Register(rule);
@@ -73,13 +74,13 @@ namespace Grim.Tests
             var activatingRule = Rule.New()
                 .WithId("activating")
                 .WithCondition(x => x.Event == "DRAW_CARD")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards"); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards"); })
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .Build();
             var nonActivatingRule = Rule.New()
                 .WithId("non_activating")
                 .WithCondition(x => x.Event == "NOT_DRAW_CARD") // any other id
-                .WithAction(x => { log.Add($"This should NOT trigger"); return true; })
+                .WithAction(async x => { log.Add($"This should NOT trigger"); })
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .Build();
             instance.Register(activatingRule);
@@ -106,7 +107,7 @@ namespace Grim.Tests
             var activatingRule = Rule.New()
                 .WithId("activating")
                 .WithCondition(x => x.Event == "DRAW_CARD")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards"); })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards"); })
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .Build();
             instance.Register(activatingRule);
@@ -132,19 +133,19 @@ namespace Grim.Tests
             var selfRule = Rule.New()
                 .WithId("action_draw")
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); })
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .Build();
             var triggerRule1 = Rule.New()
                 .WithId("draw_trigger_lifegain")
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Gained 1 life."); return true; })
+                .WithAction(async x => { log.Add($"Gained 1 life."); })
                 .WithPath(new[] { "ACTUATORS", "TRIGGERS" })
                 .Build();
             var triggerRule2 = Rule.New()
                 .WithId("draw_trigger_discard")
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Discarded a card."); return true; })
+                .WithAction(async x => { log.Add($"Discarded a card."); })
                 .WithPath(new[] { "ACTUATORS", "TRIGGERS" })
                 .Build();
             instance.Register(selfRule);
@@ -176,13 +177,13 @@ namespace Grim.Tests
                 .WithId("action_draw")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); })
                 .Build();
             var stopRule = Rule.New()
                 .WithId("block_draw")
                 .WithPath(new[] { "CONTINUOUS", "ON_RULES" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => false)
+                .WithAction(async x => System.Threading.Tasks.Task.FromResult(false))
                 .Build();
             instance.Register(selfRule);
             instance.Register(stopRule);
@@ -209,13 +210,17 @@ namespace Grim.Tests
                 .WithId("action_draw")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); })
                 .Build();
             var stopRule = Rule.New()
                 .WithId("double_draw")
                 .WithPath(new[] { "REPLACEMENT", "OTHER" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { x.Put<int>("AMOUNT", 2 * x.Get<int>("AMOUNT")); return true; })
+                .WithMaxExecutions(1)
+                .WithAction(async x => {
+                    instance.Process(new GameEventData("ACTION_DRAW_N").Put<int>("AMOUNT", 2 * x.Get<int>("AMOUNT")));
+                    return false;
+                })
                 .Build();
             instance.Register(selfRule);
             instance.Register(stopRule);
@@ -243,19 +248,23 @@ namespace Grim.Tests
                 .WithId("action_draw")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); })
                 .Build();
             var ruleToExecute = Rule.New()
                 .WithId("action_gain_life")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "GAIN_LIFE")
-                .WithAction(x => { log.Add($"Gained {x.Get<int>("AMOUNT")} life."); return true; })
+                .WithAction(async x => { log.Add($"Gained {x.Get<int>("AMOUNT")} life."); })
                 .Build();
             var replacementRule = Rule.New()
                 .WithId("replace_draw_with_lifegain")
                 .WithPath(new[] { "REPLACEMENT", "OTHER" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { x.Event = "GAIN_LIFE"; instance.Process(x); return false; })
+                .WithMaxExecutions(1)
+                .WithAction(async x => {
+                    instance.Process(new GameEventData("GAIN_LIFE").Put<int>("AMOUNT", x.Get<int>("AMOUNT")));
+                    return false;
+                })
                 .Build();
             // Order doesn't matter
             instance.Register(replacementRule);
@@ -285,20 +294,26 @@ namespace Grim.Tests
                 .WithId("action_draw")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); return true; })
+                .WithAction(async x => { log.Add($"Drawn {x.Get<int>("AMOUNT")} cards."); })
                 .Build();
             var replacementRule1 = Rule.New()
                 .WithId("replace_lifegain_with_draw")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(x => x.Event == "GAIN_LIFE")
-                .WithAction(x => { x.Event = "ACTION_DRAW_N"; instance.Process(x); return false; ; })
+                .WithAction(async x => {
+                    instance.Process(new GameEventData("ACTION_DRAW_N").Put<int>("AMOUNT", x.Get<int>("AMOUNT")));
+                    return false;
+                })
                 .WithMaxExecutions(1)
                 .Build();
             var replacementRule2 = Rule.New()
                 .WithId("replace_draw_with_lifegain")
                 .WithPath(new[] { "REPLACEMENT", "OTHER" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(x => { x.Event = "GAIN_LIFE"; instance.Process(x); return false; })
+                .WithAction(async x => {
+                    instance.Process(new GameEventData("GAIN_LIFE").Put<int>("AMOUNT", x.Get<int>("AMOUNT")));
+                    return false;
+                })
                 .WithMaxExecutions(1)
                 .Build();
             // Order doesn't matter

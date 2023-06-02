@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Grim.Rules;
 using System.Collections;
 using UnityEngine;
@@ -10,8 +11,8 @@ namespace Decodex
         {
             var gameMode = new StandardGameMode();
             gameMode.StartGame();
-            StartCoroutine(EndTurnTest(3, GameState.Instance.PlayerOrder[0]));
-            StartCoroutine(EndTurnTest(6, GameState.Instance.PlayerOrder[1]));
+            //StartCoroutine(EndTurnTest(3, GameState.Instance.PlayerOrder[0]));
+            //StartCoroutine(EndTurnTest(6, GameState.Instance.PlayerOrder[1]));
         }
 
         private IEnumerator EndTurnTest(int delay, string playerId)

@@ -5,10 +5,11 @@ using Grim.Zones;
 using Grim.Zones.Coordinates;
 using System.Collections.Generic;
 using UnityEngine;
-using Grim.Utils;
 using Decodex.Utils;
 using System.Linq;
 using Grim.Players;
+using DG.Tweening;
+using System.Threading.Tasks;
 
 namespace Decodex
 {
@@ -42,6 +43,7 @@ namespace Decodex
                     ArrayUtils.Shuffle(players);
                     GameState.Instance.PlayerOrder = new List<string>(players.Select(player => player.GetComponent<PlayerController>().Model.Id));
                     Debug.Log("DETERMINE_PLAYER_ORDER: Player order is: " + string.Join(", ", GameState.Instance.PlayerOrder));
+                    return Task.CompletedTask;
                 })
                 .Build()
             );
@@ -53,20 +55,19 @@ namespace Decodex
                 .WithId("DRAW_STARTING_HAND")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(data => data.Event == GameEventTypes.StartGame)
-                .WithAction(data =>
+                .WithAction(async data =>
                 {
                     // TODO: Consider creating a utility for this
                     var playerModels = new List<Player>(GameObject.FindGameObjectsWithTag("PLAYER").Select(player => player.GetComponent<PlayerController>().Model));
-                    playerModels.ForEach(playerModel =>
+                    foreach(var playerModel in playerModels)
                     {
                         Debug.Log("DRAW_STARTING_HAND: Drawing hand for player " + playerModel.Id);
-                        RuleEngine.Instance.Process(
-                        new GameEventData(GameEventTypes.DrawN)
-                            .Put<int>("AMOUNT", 7)
-                            .Put<string>("ZONE_FROM", playerModel.ZoneIds["deck"])
-                            .Put<string>("ZONE_TO", playerModel.ZoneIds["hand"])
+                        await RuleEngine.Instance.Process(
+                            new GameEventData(GameEventTypes.DrawN)
+                                .Put<int>("AMOUNT", 7)
+                                .Put<string>("PLAYER", playerModel.Id)
                         );
-                    });
+                    }
                 })
                 .Build()
             );
@@ -76,11 +77,11 @@ namespace Decodex
                 .WithId("START_FIRST_ROUND")
                 .WithPath(new[] { "ACTUATORS", "POST" })
                 .WithCondition(data => data.Event == GameEventTypes.StartGame)
-                .WithAction(data =>
+                .WithAction(async data =>
                 {
                     var firstPlayerId = GameState.Instance.PlayerOrder[0];
                     Debug.Log("START_ROUND: Starting round. First player is: " + firstPlayerId);
-                    RuleEngine.Instance.Process(
+                    await RuleEngine.Instance.Process(
                         new GameEventData(GameEventTypes.StartTurn)
                             .Put<string>("PLAYER", firstPlayerId)
                     );
@@ -97,15 +98,14 @@ namespace Decodex
                 .WithId("START_TURN_DRAW")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(data => data.Event == GameEventTypes.StartTurn)
-                .WithAction(data =>
+                .WithAction(async data =>
                 {
                     var turnPlayerId = data.Get<string>("PLAYER");
                     var turnPlayerModel = GameObject.Find(turnPlayerId).GetComponent<PlayerController>().Model;
                     Debug.Log("START_TURN_DRAW: Drawing a card at start of turn for player " + turnPlayerId);
-                    RuleEngine.Instance.Process(
+                    await RuleEngine.Instance.Process(
                         new GameEventData(GameEventTypes.Draw)
-                            .Put<string>("ZONE_FROM", turnPlayerModel.ZoneIds["deck"])
-                            .Put<string>("ZONE_TO", turnPlayerModel.ZoneIds["hand"])
+                            .Put<string>("PLAYER", turnPlayerModel.Id)
                     );
                 })
                 .Build()
@@ -118,15 +118,16 @@ namespace Decodex
                 .WithCondition(data => {
                     var turnPlayer = data.Get<string>("PLAYER");
                     var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
+                    // TODO: this condition should not be duplicated
                     var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers - 1;
                     return data.Event == GameEventTypes.EndTurn && isThereFollowingPlayer;
                 })
-                .WithAction(data => {
+                .WithAction(async data => {
                     var turnPlayer = data.Get<string>("PLAYER");
                     var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
                     var nextPlayer = GameState.Instance.PlayerOrder[orderInTurn + 1];
                     Debug.Log("START_FOLLOWING_TURN: Starting turn for player " + nextPlayer);
-                    RuleEngine.Instance.Process(
+                    await RuleEngine.Instance.Process(
                         new GameEventData(GameEventTypes.StartTurn)
                             .Put<string>("PLAYER", nextPlayer)
                     );
@@ -140,12 +141,13 @@ namespace Decodex
                 .WithCondition(data => {
                     var turnPlayer = data.Get<string>("PLAYER");
                     var orderInTurn = GameState.Instance.PlayerOrder.IndexOf(turnPlayer);
+                    // TODO: this condition should not be duplicated
                     var isThereFollowingPlayer = orderInTurn < GameState.Instance.NumPlayers - 1;
                     return data.Event == GameEventTypes.EndTurn && !isThereFollowingPlayer;
                 })
-                .WithAction(data => {
+                .WithAction(async data => {
                     Debug.Log("START_SIMULATION: Starting simulation");
-                    RuleEngine.Instance.Process(
+                    await RuleEngine.Instance.Process(
                         new GameEventData(GameEventTypes.StartSimulation)
                     );
                 })
@@ -162,13 +164,12 @@ namespace Decodex
                 .WithId("DRAW_N")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(data => data.Event == GameEventTypes.DrawN)
-                .WithAction(data =>
+                .WithAction(async data =>
                 {
                     for (int i = 0; i < data.Get<int>("AMOUNT"); i++)
-                        RuleEngine.Instance.Process(
+                        await RuleEngine.Instance.Process(
                             new GameEventData(GameEventTypes.Draw)
-                                .Put<string>("ZONE_FROM", data.Get<string>("ZONE_FROM"))
-                                .Put<string>("ZONE_TO", data.Get<string>("ZONE_TO"))
+                                .Put<string>("PLAYER", data.Get<string>("PLAYER"))
                         );
                 })
                 .Build()
@@ -179,15 +180,23 @@ namespace Decodex
                 .WithId("DRAW")
                 .WithPath(new[] { "ACTUATORS", "SELF" })
                 .WithCondition(data => data.Event == GameEventTypes.Draw)
-                .WithAction(data =>
+                .WithAction(async data =>
                 {
-                    var modelFrom = GameObject.Find(data.Get<string>("ZONE_FROM")).GetComponent<ZoneController<LinearCoordinate, CardInstance>>().Model;
-                    var modelTo = GameObject.Find(data.Get<string>("ZONE_TO")).GetComponent<ZoneController<LinearCoordinate, CardInstance>>().Model;
-                    var cardToDraw = modelFrom.Get(new LinearCoordinate(0));
-                    modelFrom.Remove(new LinearCoordinate(0)); // todo: might be useful to have a remove with item as well
-                    modelTo.Put(cardToDraw);
-                    // Possibly delegate to a more generic "MOVE_CARD" rule.
-                    // To further split into "REMOVE_CARD_FROM_ZONE" and "ADD_CARD_TO_ZONE"
+                    var player = GameObject.Find(data.Get<string>("PLAYER")).GetComponent<PlayerController>().Model;
+                    var deckModel = GameObject.Find(player.ZoneIds["deck"]).GetComponent<ZoneController<LinearCoordinate, CardInstance>>().Model;
+                    var handModel = GameObject.Find(player.ZoneIds["hand"]).GetComponent<ZoneController<LinearCoordinate, CardInstance>>().Model;
+                    var inspectorTransform = GameObject.Find(player.ZoneIds["inspector"]).transform;
+                    
+                    var cardToDraw = deckModel.Get(new LinearCoordinate(0));
+                    var cardObject = GameObject.Find(cardToDraw.Id);
+                    deckModel.Remove(new LinearCoordinate(0));
+                    await DOTween.Sequence()
+                        .Join(cardObject.transform.DOMove(inspectorTransform.position, 0.3f).SetEase(Ease.InOutQuad))
+                        .Join(cardObject.transform.DORotate(inspectorTransform.rotation.eulerAngles, 0.3f).SetEase(Ease.InOutQuad))
+                        .AsyncWaitForCompletion();
+                    
+                    await Task.Delay(300);
+                    handModel.Put(cardToDraw);
                 })
                 .Build()
             );

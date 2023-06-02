@@ -1,6 +1,7 @@
 using Grim.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grim.Rules
 {
@@ -10,10 +11,10 @@ namespace Grim.Rules
         private List<string> _path;
         public List<string> Path { get { return new(_path); } }
         public Func<GameEventData, bool> Condition;
-        public Func<GameEventData, bool> Action;
+        public Func<GameEventData, Task<bool>> Action;
         public int? MaxExecutions { get; private set; }
 
-        public Rule(string id, List<string> path, Func<GameEventData, bool> condition, Func<GameEventData, bool> action, int? maxExecutions)
+        public Rule(string id, List<string> path, Func<GameEventData, bool> condition, Func<GameEventData, Task<bool>> action, int? maxExecutions)
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
             if (path == null) throw new ArgumentNullException(nameof(path));

@@ -1,4 +1,3 @@
-using Decodex.Zones;
 using Grim;
 using Grim.Players;
 using Grim.Rules;
@@ -37,6 +36,7 @@ namespace Decodex
             zoneIds.Add("hand", $"hand_{id}");
             zoneIds.Add("deck", $"deck_{id}");
             zoneIds.Add("memory", $"memory_{id}");
+            zoneIds.Add("inspector", $"inspector_{id}");
             return new(id, zoneIds, null, null, null);
         }
 
@@ -73,22 +73,30 @@ namespace Decodex
 
 
             var deck1Position = new Vector3(5, 0, -3.75f);
-            var deck1Rotation = Quaternion.Euler(new Vector3(270, 180, 0));
+            var deck1Rotation = Quaternion.Euler(new Vector3(90, 0, 0));
             StandardGameModeZones.CreateDeck("deck_player_1", zonesRootObj.transform, deck1Position, deck1Rotation);
 
             var deck2Position = new Vector3(-5, 0, 3.75f);
-            var deck2Rotation = Quaternion.Euler(new Vector3(270, 0, 0));
+            var deck2Rotation = Quaternion.Euler(new Vector3(90, 180, 0));
             StandardGameModeZones.CreateDeck("deck_player_2", zonesRootObj.transform, deck2Position, deck2Rotation);
+
+            var inspector1Position = new Vector3(0.69f, 6.52f, -3.52f);
+            var inspector1Rotation = Quaternion.Euler(new Vector3(-67,180,0));
+            StandardGameModeZones.CreateInspector("inspector_player_1", zonesRootObj.transform, inspector1Position, inspector1Rotation);
+
+            var inspector2Position = new Vector3(-0.69f, 6.52f, 3.52f);
+            var inspector2Rotation = Quaternion.Euler(new Vector3(-67, 0, 0));
+            StandardGameModeZones.CreateInspector("inspector_player_2", zonesRootObj.transform, inspector2Position, inspector2Rotation);
 
             Array.ForEach(zonesRootObj.GetComponentsInChildren<IRenderable>(), renderable => renderable.Render());
         }
 
-        public void StartGame()
+        public async void StartGame()
         {
             CreateZones();
             RegisterPlayers();
             InitRuleEngine();
-            RuleEngine.Instance.Process(
+            await RuleEngine.Instance.Process(
                 new GameEventData(GameEventTypes.StartGame)
                     .Put<List<string>>("PLAYERS", new List<string>(new[] { "player_1", "player_2" })
                )
