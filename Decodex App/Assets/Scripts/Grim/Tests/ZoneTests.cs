@@ -4,6 +4,7 @@ using NUnit.Framework;
 using NSubstitute;
 using System.Collections.Generic;
 using System;
+using Grim.Items;
 
 namespace Grim.Tests
 {

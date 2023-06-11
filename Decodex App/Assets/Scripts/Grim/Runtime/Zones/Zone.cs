@@ -1,5 +1,6 @@
 using Decodex.Utils;
 using Grim.Events;
+using Grim.Items;
 using Grim.Zones.Coordinates;
 using System;
 using System.Collections.Generic;

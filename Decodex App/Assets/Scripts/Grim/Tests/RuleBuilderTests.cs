@@ -1,8 +1,6 @@
 using Grim.Rules;
-using Grim.Utils;
 using NUnit.Framework;
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Grim.Tests
 {

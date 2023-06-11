@@ -1,5 +1,6 @@
 using Grim.Rules;
 using Grim.Utils;
+using NSubstitute.Routing.Handlers;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -183,7 +184,7 @@ namespace Grim.Tests
                 .WithId("block_draw")
                 .WithPath(new[] { "CONTINUOUS", "ON_RULES" })
                 .WithCondition(x => x.Event == "ACTION_DRAW_N")
-                .WithAction(async x => System.Threading.Tasks.Task.FromResult(false))
+                .WithAction(async x => false)
                 .Build();
             instance.Register(selfRule);
             instance.Register(stopRule);

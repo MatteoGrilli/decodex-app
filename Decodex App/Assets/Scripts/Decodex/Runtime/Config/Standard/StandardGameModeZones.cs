@@ -5,6 +5,7 @@ using Grim.Zones;
 using UnityEngine;
 using Decodex.Cards;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace Decodex
 {
@@ -110,7 +111,8 @@ namespace Decodex
                 card.transform.localRotation = zoneObj.transform.rotation;
                 var cardId = $"{id}_{i}";
                 card.name = cardId;
-                var cardModel = new CardInstance(cardId, "PRT_00");
+                var blueprint = new Card("PRT_000", new List<PrimeAttribute>(new[] { PrimeAttribute.Aegis }), new List<PrimeAttribute>(new[] { PrimeAttribute.Aegis }));
+                var cardModel = new CardInstance(cardId, blueprint);
                 model.Put(cardModel);
             }
 

@@ -1,9 +1,6 @@
+using Grim.Items;
 using Grim.Zones;
-using Grim.Zones.Coordinates;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 namespace Grim
 {

@@ -1,4 +1,7 @@
-namespace Grim.Zones
+using Grim.Zones;
+using System.Collections.Generic;
+
+namespace Grim.Items
 {
     public interface IItem
     {
