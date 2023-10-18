@@ -12,7 +12,6 @@ using DG.Tweening;
 namespace Decodex.Zones
 {
     // TODO: _slots might not be necessary afterall
-    // TODO: the component for the hand extension/retraction is also not necessary
     public class HandController : ZoneController<LinearCoordinate, CardInstance>, IPointerMoveHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [BoxGroup("Appearence")]
@@ -88,19 +87,18 @@ namespace Decodex.Zones
 
         private int _currentlyInspectedSlotIndex;
         private float _radius;
+        private bool _extended;
 
         public override void Init(Zone<LinearCoordinate, CardInstance> model)
         {
             base.Init(model);
             _radius = 1 / _curvature;
             _centerOfCurvature = CalculateCenterOfCurvature();
+            _extended = false;
             InitAnchors();
             InitSlots();
             InitInspectedSlot();
-            InitPositionController();
         }
-
-        private void InitPositionController() => GetComponentInChildren<HandPositionController>().Init(_extensionOffset, _enableRetract);
 
         private void InitAnchors() => _anchors = CalculateAnchors();
 
@@ -119,7 +117,7 @@ namespace Decodex.Zones
             if (_showAnchors || _showCenterOfCurvature) CleanDebugGizmos();
             if (_showAnchors) RenderAnchorGizmo();
             if (_showCenterOfCurvature) RenderCenterOfCurvatureGizmo();
-            ArrangeCardControllers();
+            ArrangeCardControllers(0.4f);
         }
 
         private void CleanDebugGizmos()
@@ -154,21 +152,36 @@ namespace Decodex.Zones
             }
         }
 
-        private void ArrangeCardControllers()
+        private void ArrangeCardControllers(float animationTime)
         {
             for (var i = 0; i < Model.ItemsCount(); i++)
             {
-                if (i != _currentlyInspectedSlotIndex) ArrangeCardController(i);
+               ArrangeCardController(i, animationTime);
             }
         }
 
-        private void ArrangeCardController(int index)
+        private void ArrangeCardController(int index, float animationTime)
         {
             var slot = _slots[index];
             var cardInstance = Model.GetAll()[index];
             var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
-            cardInstanceGameObject.transform.DOMove(slot.transform.position, 0.4f).SetEase(Ease.InOutCubic);
-            cardInstanceGameObject.transform.DORotate(slot.transform.rotation.eulerAngles, 0.4f).SetEase(Ease.InOutCubic);
+            if (_currentlyInspectedSlotIndex == index)
+            {
+                // TODO: animate instead
+                var slotCenterOnScreen = Camera.main.WorldToScreenPoint(slot.transform.position);
+                Vector3 inspectionPosition = Camera.main.ScreenToWorldPoint(new Vector3(slotCenterOnScreen.x, 0f, _inspectionDistanceFromCamera));
+                cardInstanceGameObject.transform.position = inspectionPosition;
+                cardInstanceGameObject.transform.position += cardInstanceGameObject.transform.up * _inspectionUpOffset;
+                var upwards = Camera.main.transform.up;
+                var forward = -Camera.main.transform.forward;
+                cardInstanceGameObject.transform.rotation = Quaternion.LookRotation(forward, upwards);
+            }
+            else
+            {
+                var newPosition = slot.transform.position - (!_extended ? transform.up : Vector3.zero) * _extensionOffset;
+                cardInstanceGameObject.transform.DOMove(newPosition, animationTime).SetEase(Ease.InOutCubic);
+                cardInstanceGameObject.transform.DORotate(slot.transform.rotation.eulerAngles, animationTime).SetEase(Ease.InOutCubic);
+            }
         }
 
         private GameObject RenderPoseGizmo(string name, Pose pose)
@@ -236,6 +249,21 @@ namespace Decodex.Zones
             throw new System.NotImplementedException();
         }
 
+        private void Extend()
+        {
+            _extended = true;
+            ArrangeCardControllers(0.1f);
+        }
+
+        private void Retract()
+        {
+            _extended = false;
+            ArrangeCardControllers(0.1f);
+        }
+
+        // TODO: restructure a bit. First function to determine what index to inspect if any
+        // Second function to actually perform the inspection
+
         public void OnPointerMove(PointerEventData eventData)
         {
             if (_enableInspection) UpdateInspectedSlot(eventData);
@@ -243,11 +271,13 @@ namespace Decodex.Zones
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (_enableRetract) Extend();
             if (_enableInspection) UpdateInspectedSlot(eventData);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            if (_enableRetract) Retract();
             if (_enableInspection) UpdateInspectedSlot(eventData);
         }
 
@@ -258,7 +288,8 @@ namespace Decodex.Zones
             if (Physics.Raycast(ray, out var hit, 10f, LayerMask.GetMask("Hand Slots")))
             {
                 InspectSlot(hit.collider.GetComponent<HandSlotController>().Index);
-            } else
+            }
+            else
             {
                 _currentlyInspectedSlotIndex = -1;
             }
@@ -268,25 +299,29 @@ namespace Decodex.Zones
         {
             if (index == _currentlyInspectedSlotIndex) return;
 
+            //var previouslyInspectedIndex = _currentlyInspectedSlotIndex;
+            _currentlyInspectedSlotIndex = index;
+            Render();
+
             // Rearrange previously inspected card
-            if (_currentlyInspectedSlotIndex >= 0)
-                ArrangeCardController(_currentlyInspectedSlotIndex);
+            //if (previouslyInspectedIndex >= 0)
+            //    ArrangeCardController(previouslyInspectedIndex, 0.1f);
 
             // Calculate inspection position
-            var slot = _slots[index];
-            var slotCenterOnScreen = Camera.main.WorldToScreenPoint(slot.transform.position);
-            Vector3 inspectionPosition = Camera.main.ScreenToWorldPoint(new Vector3(slotCenterOnScreen.x, 0f, _inspectionDistanceFromCamera));
+            //var slot = _slots[index];
+            //var slotCenterOnScreen = Camera.main.WorldToScreenPoint(slot.transform.position);
+            //Vector3 inspectionPosition = Camera.main.ScreenToWorldPoint(new Vector3(slotCenterOnScreen.x, 0f, _inspectionDistanceFromCamera));
 
-            // Arrange inspected card
-            var cardInstance = Model.GetAll()[index];
-            var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
-            cardInstanceGameObject.transform.position = inspectionPosition;
-            cardInstanceGameObject.transform.position += cardInstanceGameObject.transform.up * _inspectionUpOffset;
-            var upwards = Camera.main.transform.up;
-            var forward = -Camera.main.transform.forward;
-            cardInstanceGameObject.transform.rotation = Quaternion.LookRotation(forward, upwards);
+            // Arrange newly inspected card
+            //ArrangeCardController(index, 0.1f);
+            //var cardInstance = Model.GetAll()[index];
+            //var cardInstanceGameObject = GameObject.Find(cardInstance.Id);
+            //cardInstanceGameObject.transform.position = inspectionPosition;
+            //cardInstanceGameObject.transform.position += cardInstanceGameObject.transform.up * _inspectionUpOffset;
+            //var upwards = Camera.main.transform.up;
+            //var forward = -Camera.main.transform.forward;
+            //cardInstanceGameObject.transform.rotation = Quaternion.LookRotation(forward, upwards);
 
-            _currentlyInspectedSlotIndex = index;
         }
     }
 }

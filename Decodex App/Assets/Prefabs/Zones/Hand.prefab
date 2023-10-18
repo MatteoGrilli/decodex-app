@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7992153985396516776}
   - component: {fileID: 7992153985396516778}
-  - component: {fileID: 7992153985396516777}
   m_Layer: 0
   m_Name: Extend/Retract
   m_TagString: Untagged
@@ -46,18 +45,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 4.55, y: 1.2, z: 0.2}
   m_Center: {x: 0, y: -0.1, z: 0}
---- !u!114 &7992153985396516777
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7992153985396516783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5af2526c71f68544f979c9c829cdacaa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &7992153986934180253
 GameObject:
   m_ObjectHideFlags: 0
